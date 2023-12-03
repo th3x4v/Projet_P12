@@ -3,7 +3,8 @@ import typer
 from peewee import DoesNotExist
 
 
-app = typer.Typer()
+user_app = typer.Typer()
+app = user_app
 
 
 @app.command("create-user")
@@ -90,4 +91,4 @@ def update_role(role_id: int, name: str):
 
 if __name__ == "__main__":
     create_tables()
-    app()
+    user_app()

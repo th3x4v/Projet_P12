@@ -53,7 +53,7 @@ class Client(BaseModel):
         Sauvegarde l'instance du client en base de données.
         Met à jour la date de dernière modification à l'heure actuelle avant de sauvegarder.
         """
-        self.date_updated = datetime.now()
+        self.date_updated = datetime.datetime.now()
         return super(Client, self).save(*args, **kwargs)
 
 

@@ -2,7 +2,8 @@ import typer
 from models.models import Client, User
 from peewee import DoesNotExist
 
-app = typer.Typer()
+client_app = typer.Typer()
+app = client_app
 
 
 @app.command("create-client")
@@ -68,4 +69,4 @@ def update_client(
 
 
 if __name__ == "__main__":
-    app()
+    client_app()

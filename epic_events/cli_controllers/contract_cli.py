@@ -2,7 +2,8 @@ import typer
 from models.models import Contract, Client
 from peewee import DoesNotExist
 
-app = typer.Typer()
+contract_app = typer.Typer()
+app = contract_app
 
 
 @app.command("create-contract")
@@ -72,4 +73,4 @@ def update_contract(
 
 
 if __name__ == "__main__":
-    app()
+    contract_app()

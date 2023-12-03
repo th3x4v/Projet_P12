@@ -2,7 +2,8 @@ import typer
 from models.models import Event, Contract, User
 from peewee import DoesNotExist
 
-app = typer.Typer()
+event_app = typer.Typer()
+app = event_app
 
 
 @app.command("create-event")
@@ -88,4 +89,4 @@ def update_event(
 
 
 if __name__ == "__main__":
-    app()
+    event_app()
