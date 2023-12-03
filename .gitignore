@@ -1,0 +1,36 @@
+# ignore all files in any directory named venv
+venv/
+.venv/
+
+
+
+# ignore all files in any directory named .idea
+.idea/
+
+# ignore all .DS_Store files
+.DS_Store
+.DS_Store/
+*.DS_Store
+
+# ignore all files in any directory named book
+book/
+
+# ignore all .csv files
+*.csv
+
+# ignore all files
+*.zip
+*.pdf
+*.webp
+
+
+.test/
+test/
+.vscode/
+vscode/
+__pycache__/
+node_modules/
+package-lock.json
+package.json
+
+setup_database.py
