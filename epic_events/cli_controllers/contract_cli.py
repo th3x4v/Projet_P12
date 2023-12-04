@@ -1,12 +1,13 @@
 import typer
 from models.models import Contract, Client
 from peewee import DoesNotExist
+from cli_controllers.auth_cli import authenticated_command
 
-contract_app = typer.Typer()
-app = contract_app
+app = typer.Typer()
 
 
 @app.command("create-contract")
+@authenticated_command
 def create_contract(
     contract_name: str,
     client_id: int,
@@ -29,6 +30,7 @@ def create_contract(
 
 
 @app.command("list-contracts")
+@authenticated_command
 def list_contracts():
     contracts = Contract.select()
     for contract in contracts:
@@ -38,6 +40,7 @@ def list_contracts():
 
 
 @app.command("delete-contract")
+@authenticated_command
 def delete_contract(contract_id: int):
     try:
         contract = Contract.get(Contract.id == contract_id)
@@ -48,6 +51,7 @@ def delete_contract(contract_id: int):
 
 
 @app.command("update-contract")
+@authenticated_command
 def update_contract(
     contract_id: int,
     contract_name: str,
@@ -73,4 +77,4 @@ def update_contract(
 
 
 if __name__ == "__main__":
-    contract_app()
+    app()

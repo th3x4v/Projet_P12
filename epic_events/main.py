@@ -1,8 +1,9 @@
 from models.models import create_tables
-from cli_controllers.user_cli import user_app
-from cli_controllers.event_cli import event_app
-from cli_controllers.contract_cli import contract_app
-from cli_controllers.client_cli import client_app
+from cli_controllers.user_cli import app as user_app
+from cli_controllers.event_cli import app as event_app
+from cli_controllers.contract_cli import app as contract_app
+from cli_controllers.client_cli import app as client_app
+from cli_controllers.auth_cli import app as auth_app
 
 
 import typer
@@ -13,6 +14,7 @@ app.add_typer(user_app, name="user")
 app.add_typer(event_app, name="event")
 app.add_typer(contract_app, name="contract")
 app.add_typer(client_app, name="client")
+app.add_typer(auth_app, name="auth")
 
 if __name__ == "__main__":
     """

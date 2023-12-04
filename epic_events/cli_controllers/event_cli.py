@@ -1,12 +1,13 @@
 import typer
 from models.models import Event, Contract, User
 from peewee import DoesNotExist
+from cli_controllers.auth_cli import authenticated_command
 
-event_app = typer.Typer()
-app = event_app
+app = typer.Typer()
 
 
 @app.command("create-event")
+@authenticated_command
 def create_event(
     name: str,
     contract_id: int,
@@ -36,6 +37,7 @@ def create_event(
 
 
 @app.command("list-events")
+@authenticated_command
 def list_events():
     events = Event.select()
     for event in events:
@@ -45,6 +47,7 @@ def list_events():
 
 
 @app.command("delete-event")
+@authenticated_command
 def delete_event(event_id: int):
     try:
         event = Event.get(Event.id == event_id)
@@ -55,6 +58,7 @@ def delete_event(event_id: int):
 
 
 @app.command("update-event")
+@authenticated_command
 def update_event(
     event_id: int,
     name: str,
@@ -89,4 +93,4 @@ def update_event(
 
 
 if __name__ == "__main__":
-    event_app()
+    app()

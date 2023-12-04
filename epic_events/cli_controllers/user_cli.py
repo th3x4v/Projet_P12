@@ -1,13 +1,14 @@
 from models.models import User, Role, create_tables
 import typer
 from peewee import DoesNotExist
+from cli_controllers.auth_cli import authenticated_command
 
 
-user_app = typer.Typer()
-app = user_app
+app = typer.Typer()
 
 
 @app.command("create-user")
+@authenticated_command
 def create_user(name: str, email: str, password: str, role_name: str):
     try:
         role = Role.get(Role.name == role_name)
@@ -20,6 +21,7 @@ def create_user(name: str, email: str, password: str, role_name: str):
 
 
 @app.command("list-users")
+@authenticated_command
 def list_users():
     users = User.select()
     for user in users:
@@ -29,6 +31,7 @@ def list_users():
 
 
 @app.command("delete-user")
+@authenticated_command
 def delete_user(user_id: int):
     try:
         user = User.get(User.id == user_id)
@@ -39,6 +42,7 @@ def delete_user(user_id: int):
 
 
 @app.command("update-user")
+@authenticated_command
 def update_user(user_id: int, name: str, email: str, password: str, role_name: str):
     try:
         user = User.get(User.id == user_id)
@@ -56,12 +60,14 @@ def update_user(user_id: int, name: str, email: str, password: str, role_name: s
 
 
 @app.command("create-role")
+@authenticated_command
 def create_role(name: str):
     role = Role.create(name=name)
     typer.echo(f"Role {role.name} created successfully.")
 
 
 @app.command("list-roles")
+@authenticated_command
 def list_roles():
     roles = Role.select()
     for role in roles:
@@ -69,6 +75,7 @@ def list_roles():
 
 
 @app.command("delete-role")
+@authenticated_command
 def delete_role(role_id: int):
     try:
         role = Role.get(Role.id == role_id)
@@ -79,6 +86,7 @@ def delete_role(role_id: int):
 
 
 @app.command("update-role")
+@authenticated_command
 def update_role(role_id: int, name: str):
     try:
         role = Role.get(Role.id == role_id)
@@ -91,4 +99,4 @@ def update_role(role_id: int, name: str):
 
 if __name__ == "__main__":
     create_tables()
-    user_app()
+    app()

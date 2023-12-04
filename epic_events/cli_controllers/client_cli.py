@@ -1,12 +1,14 @@
 import typer
 from models.models import Client, User
 from peewee import DoesNotExist
+from cli_controllers.auth_cli import authenticated_command
 
-client_app = typer.Typer()
-app = client_app
+
+app = typer.Typer()
 
 
 @app.command("create-client")
+@authenticated_command
 def create_client(
     name: str, email: str, phone: str, company: str, sales_contact_id: int
 ):
@@ -25,6 +27,7 @@ def create_client(
 
 
 @app.command("list-clients")
+@authenticated_command
 def list_clients():
     clients = Client.select()
     for client in clients:
@@ -34,6 +37,7 @@ def list_clients():
 
 
 @app.command("delete-client")
+@authenticated_command
 def delete_client(client_id: int):
     try:
         client = Client.get(Client.id == client_id)
@@ -44,6 +48,7 @@ def delete_client(client_id: int):
 
 
 @app.command("update-client")
+@authenticated_command
 def update_client(
     client_id: int,
     name: str,
@@ -69,4 +74,4 @@ def update_client(
 
 
 if __name__ == "__main__":
-    client_app()
+    app()
