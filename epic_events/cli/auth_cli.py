@@ -1,5 +1,3 @@
-# auth_cli.py
-
 import typer
 from models.models import User
 import jwt
@@ -45,6 +43,18 @@ def store_token(token):
         token_file.write(token)
 
 
+ALL_ALLOWED = ["admin", "support", "sales"]
+ADMIN_ALLOWED = ["admin"]
+SUPPORT_SALES_ALLOWED = ["support", "sales"]
+ADMIN_SALES_ALLOWED = ["admin", "sales"]
+SUPPORT_ALLOWED = ["support"]
+SALES_ALLOWED = ["sales"]
+
+
+# Global dictionary to store user information
+user_info = {}
+
+
 def authenticated_command(func):
     def wrapper():
         try:
@@ -53,6 +63,9 @@ def authenticated_command(func):
                 decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
                 # Check if the token is not expired and has necessary information
                 if "user_id" in decoded_token and "role" in decoded_token:
+                    # Store user information in the global dictionary
+                    user_info["user_id"] = decoded_token["user_id"]
+                    user_info["role"] = decoded_token["role"]
                     return func()
                 else:
                     typer.echo("Invalid token. Please reauthenticate.")

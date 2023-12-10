@@ -1,7 +1,7 @@
 import typer
 from models.models import Event, Contract, User
 from peewee import DoesNotExist
-from cli_controllers.auth_cli import authenticated_command
+from cli.auth_cli import authenticated_command
 
 app = typer.Typer()
 

@@ -38,11 +38,28 @@ class User(BaseModel):
         return f"User {self.name}"
 
     def create_superuser(name, password):
+        """
+        Creates a new superuser with the given name and password.
+
+        Args:
+            name (str): The name of the new superuser.
+            password (str): The password for the new superuser.
+        """
         admin_role = Role.get(Role.name == "admin")
         User.create(name=name, password=password, role=admin_role)
 
     @classmethod
     def authenticate(cls, email, password):
+        """
+        Authenticates a user with the given email and password.
+
+        Args:
+            email (str): The email of the user to authenticate.
+            password (str): The password for the user to authenticate.
+
+        Returns:
+            User or None: The authenticated user, or None if authentication failed.
+        """
         try:
             user = cls.get(cls.email == email, cls.password == password)
             return user
@@ -50,11 +67,25 @@ class User(BaseModel):
             return None
 
     def generate_jwt_token(self):
+        """
+        Generate a JSON Web Token (JWT) to authenticate the user.
+
+        Returns:
+            str: The JWT token.
+        """
         # Set the expiration time for the token (e.g., 1 hour)
         expiration_time = datetime.utcnow() + timedelta(hours=0.1)
-        payload = {"user_id": self.id, "role": self.role.name, "exp": expiration_time}
+
+        # Define the payload of the JWT, which includes the user ID, role, and expiration time
+        payload = {
+            "user_id": self.id,
+            "role": self.role.name,
+            "exp": expiration_time,
+        }
+
         # Replace 'your-secret-key' with a secure secret key for signing the token
         token = jwt.encode(payload, "your-secret-key", algorithm="HS256")
+
         return token
 
 
@@ -72,8 +103,17 @@ class Client(BaseModel):
 
     def save(self, *args, **kwargs):
         """
-        Sauvegarde l'instance du client en base de données.
-        Met à jour la date de dernière modification à l'heure actuelle avant de sauvegarder.
+        Save the model instance to the database.
+
+        This method is a wrapper around the `Model.save` method that sets the
+        `date_updated` field to the current date and time before saving.
+
+        Args:
+            *args: Positional arguments to pass to the `Model.save` method.
+            **kwargs: Keyword arguments to pass to the `Model.save` method.
+
+        Returns:
+            The saved model instance.
         """
         self.date_updated = datetime.now()
         return super(Client, self).save(*args, **kwargs)
@@ -106,6 +146,12 @@ class Event(BaseModel):
 
 
 def create_tables():
+    """
+    Create the database tables for the application.
+
+    This function connects to the database, creates the tables if they do not already exist,
+    and initializes the roles table with the default roles.
+    """
     db.connect()
     # Create tables if they don't already exist
     db.create_tables([User, Client, Contract, Event, Role], safe=True)
@@ -113,6 +159,11 @@ def create_tables():
 
 
 def initialize_roles():
+    """
+    Initializes the roles table with the default roles.
+
+    This function creates the default roles (admin, sales, and support) if they do not already exist.
+    """
     roles_data = ["admin", "sales", "support"]
 
     for role_name in roles_data:
