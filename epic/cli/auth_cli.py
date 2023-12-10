@@ -1,5 +1,5 @@
 import typer
-from models.models import User
+from epic.models.models import User
 import jwt
 import os
 
@@ -11,7 +11,9 @@ SECRET_KEY = "your-secret-key"  # to eplace with a secure secret key
 
 
 @app.command("login")
-def login(email: str, password: str):
+def login():
+    email = typer.prompt("Enter email:")
+    password = typer.prompt("Enter password:", hide_input=True)
     token = authenticate(email, password)
     if token:
         store_token(token)
@@ -41,14 +43,6 @@ def authenticate(email: str, password: str):
 def store_token(token):
     with open("jwt_token.txt", "w") as token_file:
         token_file.write(token)
-
-
-ALL_ALLOWED = ["admin", "support", "sales"]
-ADMIN_ALLOWED = ["admin"]
-SUPPORT_SALES_ALLOWED = ["support", "sales"]
-ADMIN_SALES_ALLOWED = ["admin", "sales"]
-SUPPORT_ALLOWED = ["support"]
-SALES_ALLOWED = ["sales"]
 
 
 # Global dictionary to store user information

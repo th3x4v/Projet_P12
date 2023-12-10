@@ -37,7 +37,7 @@ class User(BaseModel):
     def __str__(self):
         return f"User {self.name}"
 
-    def create_superuser(name, password):
+    def create_superuser(name, email, password):
         """
         Creates a new superuser with the given name and password.
 
@@ -46,7 +46,7 @@ class User(BaseModel):
             password (str): The password for the new superuser.
         """
         admin_role = Role.get(Role.name == "admin")
-        User.create(name=name, password=password, role=admin_role)
+        User.create(name=name, email=email, password=password, role=admin_role)
 
     @classmethod
     def authenticate(cls, email, password):
@@ -60,10 +60,12 @@ class User(BaseModel):
         Returns:
             User or None: The authenticated user, or None if authentication failed.
         """
+        print("cls auhtenticate")
         try:
             user = cls.get(cls.email == email, cls.password == password)
             return user
         except DoesNotExist:
+            print("user doenst exist")
             return None
 
     def generate_jwt_token(self):

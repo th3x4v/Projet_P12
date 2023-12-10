@@ -1,9 +1,9 @@
-from models.models import User, Role, create_tables
+from epic.models.models import User, Role, create_tables
 import typer
 from peewee import DoesNotExist
-from cli.auth_cli import authenticated_command
+from epic.cli.auth_cli import authenticated_command
 import os
-from cli.auth_cli import user_info
+from epic.cli.auth_cli import user_info
 import inspect
 
 

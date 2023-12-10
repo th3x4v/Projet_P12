@@ -1,7 +1,14 @@
 import typer
-from models.models import Contract, Client
+from epic.models.models import Contract, Client
 from peewee import DoesNotExist
-from cli.auth_cli import authenticated_command
+from epic.cli.auth_cli import authenticated_command
+from epic.cli.user_cli import method_allowed
+from epic.cli.auth_cli import user_info
+import inspect
+import os
+
+# Get the filename of the module
+filename, _ = os.path.splitext(os.path.basename(os.path.abspath(__file__)))
 
 app = typer.Typer()
 
