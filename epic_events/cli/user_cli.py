@@ -40,13 +40,13 @@ filename, _ = os.path.splitext(os.path.basename(os.path.abspath(__file__)))
 @app.command("create")
 @authenticated_command
 def create_user():
-    name = typer.prompt("Enter name:")
-    email = typer.prompt("Enter email:")
-    password = typer.prompt("Enter password:", hide_input=True)
-    role_name = typer.prompt("Enter role name:")
-
+    # Check permission
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
+        name = typer.prompt("Enter name:")
+        email = typer.prompt("Enter email:")
+        password = typer.prompt("Enter password:", hide_input=True)
+        role_name = typer.prompt("Enter role name:")
         try:
             role = Role.get(Role.name == role_name)
             user = User.create(name=name, email=email, password=password, role=role)
@@ -70,10 +70,10 @@ def list_users():
 @app.command("delete")
 @authenticated_command
 def delete_user():
-    user_id = typer.prompt("Enter user ID:")
-
+    # Check permission
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
+        user_id = typer.prompt("Enter user ID:")
         try:
             user = User.get(User.id == user_id)
             user.delete_instance()
@@ -87,6 +87,7 @@ def delete_user():
 @app.command("update")
 @authenticated_command
 def update_user():
+    # Check permission
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
         user_id = typer.prompt("Enter user ID to update:")
