@@ -100,5 +100,84 @@ def update_event(
         )
 
 
+@app.command("update")
+@authenticated_command
+def update_event():
+    function_name = inspect.currentframe().f_code.co_name
+    if user_info["role"] in method_allowed[filename + "." + function_name]:
+        event_id = typer.prompt("Enter event ID to update:")
+        try:
+            event = Event.get(Event.id == event_id)
+            try:
+                support_contact = User.get(User.id == event.support_contact.id)
+            except DoesNotExist:
+                if user_info["role"] == "admin":
+                    support_contact_id = typer.prompt(
+                        "Enter support contact ID to update:"
+                    )
+                    try:
+                        sales_contact = User.get(User.id == support_contact_id)
+                        event.sales_contact = support_contact
+                        event.save()
+                        typer.echo(f"Event {event.name} updated successfully.")
+                    except DoesNotExist:
+                        typer.echo(
+                            f"Sales contact with ID '{support_contact_id}' does not exist."
+                        )
+                else:
+                    typer.echo(
+                        "Support contact does not exist. Contact an administator."
+                    )
+        except DoesNotExist:
+            typer.echo(
+                f"Event with ID {event_id} or Contract or support contact does not exist."
+            )
+            return None
+
+        name = typer.prompt("Enter new name or press 'Enter':", default=event.name)
+        contract_id = typer.prompt(
+            "Enter new contract ID or press 'Enter':", default=event.contract.id
+        )
+        support_contact_id = typer.prompt(
+            "Enter new support contact ID or press 'Enter':",
+            default=event.support_contact.id,
+        )
+        date_start = typer.prompt(
+            "Enter new start date or press 'Enter':", default=event.date_start
+        )
+        date_end = typer.prompt(
+            "Enter new end date or press 'Enter':", default=event.date_end
+        )
+        location = typer.prompt(
+            "Enter new location or press 'Enter':", default=event.location
+        )
+        attendees = typer.prompt(
+            "Enter new number of attendees or press 'Enter':", default=event.attendees
+        )
+        notes = typer.prompt("Enter new notes or press 'Enter':", default=event.notes)
+
+        try:
+            contract = Contract.get(Contract.id == contract_id)
+            support_contact = User.get(User.id == support_contact_id)
+
+            event.name = name
+            event.contract = contract
+            event.support_contact = support_contact
+            event.date_start = date_start
+            event.date_end = date_end
+            event.location = location
+            event.attendees = attendees
+            event.notes = notes
+
+            event.save()
+            typer.echo(f"Event {event.name} updated successfully.")
+        except DoesNotExist:
+            typer.echo(
+                f"Contract with ID {contract_id} or support contact with ID {support_contact_id} does not exist."
+            )
+    else:
+        print("User not allowed")
+
+
 if __name__ == "__main__":
     app()

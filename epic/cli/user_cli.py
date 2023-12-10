@@ -144,7 +144,7 @@ def update_user():
     This function prompts the user to enter the ID of the user to update, their new name, email, password, and role name, and then updates the user with the provided information.
 
     Args:
-        user_id (int): The ID of the user to update.
+        None
 
     Returns:
         None
