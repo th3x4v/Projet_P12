@@ -45,7 +45,7 @@ class User(BaseModel):
             name (str): The name of the new superuser.
             password (str): The password for the new superuser.
         """
-        admin_role = Role.get(Role.name == "admin")
+        admin_role = Role.get(Role.name == "super_admin")
         User.create(name=name, email=email, password=password, role=admin_role)
 
     @classmethod
@@ -145,32 +145,3 @@ class Event(BaseModel):
 
     def __str__(self):
         return f"Event {self.name}"
-
-
-def create_tables():
-    """
-    Create the database tables for the application.
-
-    This function connects to the database, creates the tables if they do not already exist,
-    and initializes the roles table with the default roles.
-    """
-    db.connect()
-    # Create tables if they don't already exist
-    db.create_tables([User, Client, Contract, Event, Role], safe=True)
-    initialize_roles()
-
-
-def initialize_roles():
-    """
-    Initializes the roles table with the default roles.
-
-    This function creates the default roles (admin, sales, and support) if they do not already exist.
-    """
-    roles_data = ["admin", "sales", "support"]
-
-    for role_name in roles_data:
-        try:
-            Role.create(name=role_name)
-        except peewee.IntegrityError:
-            # Role already exists, ignore the error
-            pass
