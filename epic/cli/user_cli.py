@@ -40,6 +40,27 @@ filename, _ = os.path.splitext(os.path.basename(os.path.abspath(__file__)))
 @app.command("create")
 @authenticated_command
 def create_user():
+    """Create a new user
+
+    This function prompts the user to enter their name, email, password, and role name, and then creates a new user with the provided information.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    Raises:
+        DoesNotExist: If the role name provided does not exist
+
+    Example:
+        To create a new user with the name "John Doe", email "<EMAIL>", password "password", and role "admin", you can run the following command:
+        $ python app.py user create
+        Enter name: John Doe
+        Enter email: <EMAIL>
+        Enter password: password
+        Enter role name: admin
+        User John Doe created successfully."""
     # Check permission
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:

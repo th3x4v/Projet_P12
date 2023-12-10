@@ -1,6 +1,6 @@
 import pytest
 from peewee import SqliteDatabase, Model
-from epic_events.models.models import User, Client, Contract, Event, Role
+from epic.models.models import User, Client, Contract, Event, Role
 
 # Créer une instance de base de données en mémoire pour les tests
 test_db = SqliteDatabase(":memory:")
