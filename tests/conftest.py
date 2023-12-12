@@ -1,6 +1,7 @@
 import pytest
 from peewee import SqliteDatabase, Model
 from epic.models.models import User, Client, Contract, Event, Role
+from epic.cli.initialize_cli import initialize_roles
 
 # Créer une instance de base de données en mémoire pour les tests
 test_db = SqliteDatabase(":memory:")
@@ -20,9 +21,6 @@ def setup_database():
     test_db.bind(MODELS, bind_refs=False, bind_backrefs=False)
     test_db.connect()
     test_db.create_tables(MODELS)
-
-    # Create an admin role for testing
-    Role.create(name="admin")
 
     yield
 
