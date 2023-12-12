@@ -5,6 +5,7 @@ from epic.cli.auth_cli import authenticated_command
 import os
 from epic.cli.auth_cli import user_info
 import inspect
+import bcrypt
 
 
 app = typer.Typer()
@@ -66,10 +67,14 @@ def create_user():
         name = typer.prompt("Enter name:")
         email = typer.prompt("Enter email:")
         password = typer.prompt("Enter password:", hide_input=True)
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         role_name = typer.prompt("Enter role name:")
         try:
             role = Role.get(Role.name == role_name)
-            user = User.create(name=name, email=email, password=password, role=role)
+
+            user = User.create(
+                name=name, email=email, password=hashed_password, role=role
+            )
             typer.echo(f"User {user.name} created successfully.")
         except DoesNotExist:
             typer.echo(f"Role '{role_name}' does not exist.")

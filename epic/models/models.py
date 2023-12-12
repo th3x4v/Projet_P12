@@ -11,6 +11,7 @@ from peewee import (
 import peewee
 import jwt
 from peewee import DoesNotExist
+import bcrypt
 
 
 db = peewee.SqliteDatabase("database.db", pragmas={"foreign_keys": 1})
@@ -37,6 +38,7 @@ class User(BaseModel):
     def __str__(self):
         return f"User {self.name}"
 
+    @staticmethod
     def create_superuser(name, email, password):
         """
         Creates a new superuser with the given name and password.
@@ -46,7 +48,8 @@ class User(BaseModel):
             password (str): The password for the new superuser.
         """
         admin_role = Role.get(Role.name == "super_admin")
-        User.create(name=name, email=email, password=password, role=admin_role)
+        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        User.create(name=name, email=email, password=hashed_password, role=admin_role)
 
     @classmethod
     def authenticate(cls, email, password):
@@ -60,10 +63,13 @@ class User(BaseModel):
         Returns:
             User or None: The authenticated user, or None if authentication failed.
         """
-        print("cls auhtenticate")
         try:
-            user = cls.get(cls.email == email, cls.password == password)
-            return user
+            user = cls.get(cls.email == email)
+            if bcrypt.checkpw(password.encode("utf-8"), user.password.encode("utf-8")):
+                return user
+            else:
+                print("password doesnt match")
+                return None
         except DoesNotExist:
             print("user doenst exist")
             return None
