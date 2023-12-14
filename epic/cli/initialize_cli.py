@@ -14,9 +14,7 @@ def create_tables():
     """
     db.connect()
     # Create tables if they don't already exist
-
     db.create_tables([User, Client, Contract, Event, Role], safe=True)
-    initialize_roles()
 
 
 def initialize_roles():
@@ -41,5 +39,6 @@ def initialize():
     Initialize the database
     """
     create_tables()
+    initialize_roles()
     User.create_superuser("admin", "admin@epic.com", "password")
-    typer.echo(f"Project initialzed successfully.")
+    typer.echo(f"Project initialized successfully.")

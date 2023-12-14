@@ -20,7 +20,7 @@ db = peewee.SqliteDatabase("database.db", pragmas={"foreign_keys": 1})
 class BaseModel(peewee.Model):
     class Meta:
         database = db
-
+    
 
 class Role(BaseModel):
     name = CharField(max_length=50, null=False, unique=True)

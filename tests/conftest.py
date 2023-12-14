@@ -1,73 +1,60 @@
 import pytest
-from peewee import SqliteDatabase, Model
+from peewee import SqliteDatabase
 from epic.models.models import User, Client, Contract, Event, Role
-from epic.cli.initialize_cli import initialize_roles
-
-# Créer une instance de base de données en mémoire pour les tests
-test_db = SqliteDatabase(":memory:")
 
 MODELS = [User, Client, Contract, Event, Role]
 
 
-class TestModel(Model):
-    class Meta:
-        database = test_db
+@pytest.fixture(scope="function")
+def database():
+    test_db = SqliteDatabase(":memory:")
+    test_db.bind(MODELS, bind_refs=False, bind_backrefs=False)
+    yield test_db
+    test_db.close()
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def setup_database():
-    # Bind model classes to test db. Since we have a complete list of
-    # all models, we do not need to recursively bind dependencies.
+    test_db = SqliteDatabase(":memory:")
     test_db.bind(MODELS, bind_refs=False, bind_backrefs=False)
     test_db.connect()
     test_db.create_tables(MODELS)
-
     yield
-
-    # Not strictly necessary since SQLite in-memory databases disappear when the connection is closed,
-    # but a good practice to close the connection anyway.
     test_db.close()
 
 
 @pytest.fixture
-def user():
-    user = User.create(
-        name="John Doe", email="johndoe@example.com", password="password123"
-    )
-    return user
+def temp_token_file(tmp_path):
+    token_file = tmp_path / "temp_token.txt"
+    token_file.write_text("test_token_content")
+    return token_file
 
 
-@pytest.fixture
-def client():
-    client = Client.create(
-        name="Acme Corporation",
-        email="info@acme.com",
-        phone="+1234567890",
-        company="Acme Corporation",
-    )
-    return client
+# # list of module and class for each model
+# all_models = [
+#     {"module": user, "class": "User"},
+#     # {"module": contract, "class": "Contract"},
+# ]
 
 
-@pytest.fixture
-def contract(client):
-    contract = Contract.create(
-        contract_name="Website Development Contract",
-        client=client,
-        total_amount=1000.00,
-    )
-    return contract
+# def _link_class_to_db(db) -> list:
+#     """link the database meta attribut to classes and return the classes list from models"""
+#     models = []
+#     for item in all_models:
+#         model = getattr(item.get("module"), item.get("class"))
+#         model._meta.database = db
+#         models.append(model)
+#     return models
 
 
-@pytest.fixture
-def event(contract):
-    event = Event.create(
-        name="Website Launch Event",
-        contract=contract,
-        support_contact=None,
-        date_start="2023-10-04",
-        date_end="2023-10-04",
-        location="Acme Corporation HQ",
-        attendees=50,
-        notes="Please arrange catering and refreshments.",
-    )
-    return event
+# @pytest.fixture(scope="session")
+# def in_memory_db():
+#     """Return an in memory SQLite db for the session"""
+
+#     db = SqliteDatabase(":memory:")
+#     db.connect()
+#     all_models = _link_class_to_db(db)
+#     db.create_tables(all_models)
+
+#     yield db
+#     db.close()

@@ -1,5 +1,5 @@
 import typer
-from epic.models.models import User, db, Client, Contract, Event, Role
+from epic.models.models import User, db
 import jwt
 import os
 
@@ -7,11 +7,22 @@ app = typer.Typer()
 
 SESSION_FILE = "jwt_token.txt"
 
-SECRET_KEY = "your-secret-key"  # to eplace with a secure secret key
+SECRET_KEY = "your-secret-key"
 
 
 @app.command("login")
 def login():
+    """
+    Logs in the user with the given email and password.
+
+    Parameters:
+    email (str): The email of the user.
+    password (str): The password of the user.
+
+    Returns:
+    str: The JWT token if the login is successful, None otherwise.
+
+    """
     email = typer.prompt("Enter email:")
     password = typer.prompt("Enter password:", hide_input=True)
     token = authenticate(email, password)
@@ -24,6 +35,13 @@ def login():
 
 @app.command("logout")
 def logout():
+    """
+    Removes the JWT token file from the system and displays a message indicating that the user has been logged out.
+
+    Returns:
+        None
+
+    """
     try:
         os.remove(SESSION_FILE)
         typer.echo("Logout successful.")
@@ -41,7 +59,7 @@ def authenticate(email: str, password: str):
 
 
 def store_token(token):
-    with open("jwt_token.txt", "w") as token_file:
+    with open(SESSION_FILE, "w") as token_file:
         token_file.write(token)
 
 

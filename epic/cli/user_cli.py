@@ -197,7 +197,7 @@ def update_user():
             role = Role.get(Role.name == role_name)
             user.name = name
             user.email = email
-            user.password = password
+            user.password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
             user.role = role
             user.save()
             typer.echo(f"User {user.name} updated successfully.")

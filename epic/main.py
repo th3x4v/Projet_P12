@@ -5,6 +5,7 @@ from epic.cli.client_cli import app as client_app
 from epic.cli.auth_cli import app as auth_app
 from epic.cli.initialize_cli import app as init_app
 import typer
+import logging
 
 
 def main_function():
@@ -21,6 +22,10 @@ def main_function():
     app.add_typer(auth_app, name="auth")
 
     app()
+
+    logger = logging.getLogger("peewee")
+    logger.addHandler(logging.StreamHandler())
+    logger.setLevel(logging.DEBUG)
 
 
 if __name__ == "__main__":

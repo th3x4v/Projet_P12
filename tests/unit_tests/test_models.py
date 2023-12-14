@@ -8,11 +8,15 @@ import time
 
 def test_create_superuser(setup_database):
     role = Role.create(name="super_admin")
-    User.create_superuser(name="admin", email="admin@example.com", password="password")
-    user = User.get(User.email == "admin@example.com")
-    assert user.name == "admin"
-    assert user.email == "admin@example.com"
-    assert bcrypt.checkpw("password".encode("utf-8"), user.password.encode("utf-8"))
+    User.create_superuser(
+        name="test_admin", email="test_admin@example.com", password="test_password"
+    )
+    user = User.get(User.email == "test_admin@example.com")
+    assert user.name == "test_admin"
+    assert user.email == "test_admin@example.com"
+    assert bcrypt.checkpw(
+        "test_password".encode("utf-8"), user.password.encode("utf-8")
+    )
 
 
 def test_authenticate(setup_database):
@@ -20,45 +24,26 @@ def test_authenticate(setup_database):
     Tests the authenticate method of the User class.
     """
     role = Role.create(name="super_admin")
-    User.create_superuser(name="admin", email="admin@example.com", password="password")
-    user = User.get(User.email == "admin@example.com")
+    User.create_superuser(
+        name="test_admin", email="test_admin@example.com", password="test_password"
+    )
+    user = User.get(User.email == "test_admin@example.com")
 
     # Tests authentication with correct password
     authenticated_user = User.authenticate(
-        email="admin@example.com", password="password"
+        email="test_admin@example.com", password="test_password"
     )
     assert authenticated_user == user
 
     # Tests authentication with incorrect password
     authenticated_user = User.authenticate(
-        email="admin@example.com", password="wrong_password"
+        email="test_admin@example.com", password="wrong_password"
     )
     assert authenticated_user is None
 
     # Tests authentication with incorrect email
     authenticated_user = User.authenticate(
-        email="wrong_email@example.com", password="password"
-    )
-    assert authenticated_user is None
-
-
-def test_authenticate(setup_database):
-    role = Role.create(name="super_admin")
-    User.create_superuser(name="admin", email="admin@example.com", password="password")
-    user = User.get(User.email == "admin@example.com")
-
-    authenticated_user = User.authenticate(
-        email="admin@example.com", password="password"
-    )
-    assert authenticated_user == user
-
-    authenticated_user = User.authenticate(
-        email="admin@example.com", password="wrong_password"
-    )
-    assert authenticated_user is None
-
-    authenticated_user = User.authenticate(
-        email="wrong_email@example.com", password="password"
+        email="wrong_email@example.com", password="test_password"
     )
     assert authenticated_user is None
 
