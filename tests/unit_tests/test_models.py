@@ -7,6 +7,20 @@ import time
 
 
 def test_create_superuser(setup_database):
+    """
+    Creates a superuser with the given name, email, and password.
+
+    Args:
+        name (str): The name of the user.
+        email (str): The email of the user.
+        password (str): The password of the user.
+
+    Returns:
+        User: The created user.
+
+    Raises:
+        ValueError: If the password is not secure enough.
+    """
     role = Role.create(name="super_admin")
     User.create_superuser(
         name="test_admin", email="test_admin@example.com", password="test_password"
@@ -49,10 +63,16 @@ def test_authenticate(setup_database):
 
 
 # TestGenerateJwtToken:
-
-
-# Generates a JWT token with a valid expiration time, user ID, and role.
 def test_valid_jwt_token():
+    """
+    Tests that a valid JWT token is generated with the correct user ID and role.
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If the JWT token is not valid.
+    """
     user = User()
     user.id = 1
     user.role = Role(name="admin")
@@ -62,8 +82,16 @@ def test_valid_jwt_token():
     assert decoded_token["role"] == "admin"
 
 
-# Returns the generated JWT token as a string.
 def test_return_type():
+    """
+    Tests that the return type of the generate_jwt_token method is a string.
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If the return type is not a string.
+    """
     user = User()
     user.id = 1
     user.role = Role(name="admin")
@@ -71,10 +99,19 @@ def test_return_type():
     assert isinstance(token, str)
 
 
-# Test update client:
-
-
 def test_save_updates_date(setup_database):
+    """
+    Tests that the save method of the Client model updates the date_updated field.
+
+    Args:
+        setup_database (func): A function that sets up the test database.
+
+    Returns:
+        None
+
+    Raises:
+        AssertionError: If the date_updated field is not updated.
+    """
     role = Role.create(name="sales")
     user = User.create(
         name="Henry",

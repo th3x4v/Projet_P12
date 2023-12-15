@@ -20,7 +20,7 @@ db = peewee.SqliteDatabase("database.db", pragmas={"foreign_keys": 1})
 class BaseModel(peewee.Model):
     class Meta:
         database = db
-    
+
 
 class Role(BaseModel):
     name = CharField(max_length=50, null=False, unique=True)
@@ -48,8 +48,12 @@ class User(BaseModel):
             password (str): The password for the new superuser.
         """
         admin_role = Role.get(Role.name == "super_admin")
-        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        User.create(name=name, email=email, password=hashed_password, role=admin_role)
+        # hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+        User.create(name=name, email=email, password=password, role=admin_role)
+
+    def save(self, *args, **kwargs):
+        self.password = bcrypt.hashpw(self.password.encode("utf-8"), bcrypt.gensalt())
+        super().save(*args, **kwargs)
 
     @classmethod
     def authenticate(cls, email, password):
@@ -128,7 +132,7 @@ class Client(BaseModel):
 
 
 class Contract(BaseModel):
-    contract_name = CharField(max_length=255, null=False)
+    name = CharField(max_length=255, null=False)
     client = ForeignKeyField(Client, backref="contracts")
     total_amount = FloatField(default=0.0)
     due_amount = FloatField(default=0.0)
@@ -136,7 +140,7 @@ class Contract(BaseModel):
     date_created = DateTimeField(default=datetime.now)
 
     def __str__(self):
-        return f"Contract {self.contract_id}"
+        return f"Contract {self.id}"
 
 
 class Event(BaseModel):

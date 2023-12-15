@@ -63,24 +63,41 @@ def create_client():
         print("User not allowed")
 
 
-# @app.command("delete-client")
-# @authenticated_command
-# def delete_client(client_id: int):
-#     try:
-#         client = Client.get(Client.id == client_id)
-#         client.delete_instance()
-#         typer.echo(f"Client {client.name} deleted successfully.")
-#     except DoesNotExist:
-#         typer.echo(f"Client with ID {client_id} does not exist.")
+@app.command("list")
+def list_clients():
+    """Get a list of all clients in the system
+
+    Args:
+    None
+
+    Returns:
+    A list of all clients in the system
+
+    Raises:
+    None
+
+    Example:
+    To get a list of all clients in the system, you can run the following command:
+    $ python -m epic client list_clients
+    Client ID: 1, Name: Acme Corp, Email: <EMAIL>, Phone: <PHONE>, Company: Acme Corp, Sales Contact ID: 1
+    Client ID: 2, Name: Globex Corp, Email: <EMAIL>, Phone: <PHONE>, Company: Globex Corp, Sales Contact ID: 2
+    ..."""
+    clients = Client.select()
+    for client in clients:
+        typer.echo(
+            f"Client ID: {client.id}, Name: {client.name}, Email: {client.email}, Phone: {client.phone}, Company: {client.company}, Sales Contact ID: {client.sales_contact.id}"
+        )
 
 
 @app.command("delete")
 @authenticated_command
 def delete_client():
-    """Deletes a client from the system.
+    """Deletes an existing client.
+
+    This function prompts the user to enter the ID of the client to delete, and then deletes the client if the user is the sales contact for the client or if they are an administrator.
 
     Args:
-        None
+        client_id (int): The ID of the client to delete.
 
     Returns:
         None
@@ -89,10 +106,11 @@ def delete_client():
         DoesNotExist: If the client with the specified ID does not exist.
 
     Example:
-        To delete a client, you can run the following command:
+        To delete a client with the ID of 1, you can run the following command:
         $ python -m epic client delete
-        Client ABC deleted successfully."""
-
+        1
+        Client 1 deleted successfully.
+    """
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
         client_id = typer.prompt("Enter client ID:")
@@ -112,12 +130,13 @@ def delete_client():
 @app.command("update")
 @authenticated_command
 def update_client():
-    """Updates an existing client.
+    """
+    Updates an existing client.
 
-    This function prompts the user to enter the ID of the client to update, their new name, email, phone, company, and sales contact ID, and then updates the client with the provided information.
+    This function prompts the user to enter the ID of the client to update, and then displays information about the client if the user is the sales contact for the client or if they are an administrator. The user can then update the client's information by entering new values for the client's name, email, phone, company, and sales contact.
 
     Args:
-        None
+        client_id (int): The ID of the client to update.
 
     Returns:
         None
@@ -126,21 +145,18 @@ def update_client():
         DoesNotExist: If the client with the specified ID does not exist.
 
     Example:
-        To update a client with the ID of 1 with the name "ABC", email "<EMAIL>", phone "1234567890", company "XYZ", and sales contact ID "2", you can run the following command:
+        To update a client with the ID of 1, you can run the following command:
         $ python -m epic client update
         1
+        Client ID: 1, Name: John Doe, Email: <EMAIL>, Phone: 1234567890, Company: ABC Corp, Sales Contact ID: 1
         Enter new name or press 'Enter':
-        ABC
         Enter new email or press 'Enter':
-        <EMAIL>
         Enter new phone or press 'Enter':
-        1234567890
         Enter new company or press 'Enter':
-        XYZ
         Enter new sales contact ID or press 'Enter':
         2
-        Client ABC updated successfully."""
-
+        Client John Doe updated successfully.
+    """
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
         client_id = typer.prompt("Enter client ID to update:")
@@ -185,6 +201,37 @@ def update_client():
             typer.echo(f"Sales contact with ID '{sales_contact_id}' does not exist.")
     else:
         print("User not allowed")
+
+
+@app.command("my_clients")
+@authenticated_command
+def my_clients():
+    """Get a list of all clients where the user is the sales contact
+
+    Args:
+    None
+
+    Returns:
+    A list of all clients where the user is the sales contact
+
+    Raises:
+    None
+
+    Example:
+    To get a list of all clients where the user is the sales contact, you can run the following command:
+    $ python -m epic client my_clients
+    Client ID: 1, Name: Acme Corp, Email: <EMAIL>, Phone: <PHONE>, Company: Acme Corp, Sales Contact ID: 1
+    Client ID: 2, Name: Globex Corp, Email: <EMAIL>, Phone: <PHONE>, Company: Globex Corp, Sales Contact ID: 1
+    ...
+    """
+    function_name = inspect.currentframe().f_code.co_name
+    user = User.get_by_id(user_info["user_id"])
+    if user_info["role"] in method_allowed[filename + "." + function_name]:
+        clients = Client.select().where(Client.sales_contact == user_info["user_id"])
+        for client in clients:
+            typer.echo(
+                f"Client ID: {client.id}, Name: {client.name}, Email: {client.email}, Phone: {client.phone}, Company: {client.company}, Sales Contact ID: {client.sales_contact.id}"
+            )
 
 
 if __name__ == "__main__":

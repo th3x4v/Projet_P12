@@ -31,6 +31,9 @@ method_allowed = {
     "contract_cli.list_contracts": ["admin", "sales", "super_admin"],
     "contract_cli.delete_contract": ["admin", "sales", "super_admin"],
     "contract_cli.update_contract": ["admin", "sales", "super_admin"],
+    "contract_cli.my_contracts": ["admin", "sales", "super_admin"],
+    "event_cli.my_events": ["admin", "support", "super_admin"],
+    "client_cli.my_clients": ["admin", "sales", "super_admin"],
 }
 
 
