@@ -4,6 +4,7 @@ import peewee
 from datetime import datetime
 
 app = typer.Typer()
+roles_data = ["admin", "sales", "support", "super_admin"]
 
 
 def create_tables():
@@ -24,7 +25,6 @@ def initialize_roles():
 
     This function creates the default roles (admin, sales, and support) if they do not already exist.
     """
-    roles_data = ["admin", "sales", "support", "super_admin"]
 
     for role_name in roles_data:
         try:

@@ -6,9 +6,11 @@ import os
 from epic.cli.auth_cli import user_info
 import inspect
 import bcrypt
+from epic.utils import get_validated_input
 
 
 app = typer.Typer()
+
 
 method_allowed = {
     "user_cli.create_user": ["admin", "super_admin"],
@@ -67,17 +69,20 @@ def create_user():
         User John Doe created successfully."""
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
-        name = typer.prompt("Enter name:")
-        email = typer.prompt("Enter email:")
-        password = typer.prompt("Enter password:", hide_input=True)
-        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        role_name = typer.prompt("Enter role name:")
+        name = get_validated_input("name", "Enter your name:")
+        email = get_validated_input("email", "Enter your email address:")
+        password = get_validated_input(
+            "password", "Enter your password:", hide_input=True
+        )
+        print("password")
+        print(password)
+        role_name = get_validated_input(
+            "role_name", "Enter your role:", hide_input=False
+        )
         try:
             role = Role.get(Role.name == role_name)
 
-            user = User.create(
-                name=name, email=email, password=hashed_password, role=role
-            )
+            user = User.create(name=name, email=email, password=password, role=role)
             typer.echo(f"User {user.name} created successfully.")
         except DoesNotExist:
             typer.echo(f"Role '{role_name}' does not exist.")
