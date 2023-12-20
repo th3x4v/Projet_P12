@@ -4,6 +4,7 @@ from epic.models.models import User, Client, Contract, Event, Role
 from unittest.mock import patch, MagicMock
 from epic.cli.auth_cli import user_info
 from epic.cli.auth_cli import authenticated_command
+from functools import wraps
 
 MODELS = [User, Client, Contract, Event, Role]
 
@@ -38,21 +39,6 @@ def mock_user_info(monkeypatch):
     # This fixture will mock the user_info dictionary
     return {"user_id": 1, "role": "admin"}
 
-
-@pytest.fixture
-def mock_authenticated_command(monkeypatch):
-    """
-    This fixture will mock the authenticated_command decorator
-    """
-
-    def mock_decorator(func):
-        def wrapper(*args, **kwargs):
-            # Simulate a successful authentication by setting user_info
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    monkeypatch.setattr("epic.cli.auth_cli.authenticated_command", mock_decorator)
 
 
 @pytest.fixture
