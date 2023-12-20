@@ -40,19 +40,36 @@ def mock_user_info(monkeypatch):
     monkeypatch.setattr("epic.cli.auth_cli.user_info", mock_info)
 
 
-# @pytest.fixture
-# def mock_authenticated_command(monkeypatch):
-#     """
-#     This fixture will mock the authenticated_command decorator
-#     """
+@pytest.fixture
+def mock_authenticated_command(monkeypatch):
+    """
+    This fixture will mock the authenticated_command decorator
+    """
 
-#     def mock_decorator(func):
-#         def wrapper():
-#             return func()
+    def mock_decorator(func):
+        def wrapper():
+            return func()
 
-#         return wrapper
+        return wrapper
 
-#     monkeypatch.setattr("epic.cli.auth_cli.authenticated_command", mock_decorator)
+    monkeypatch.setattr("epic.cli.user_cli.authenticated_command", mock_decorator)
+
+
+@pytest.fixture
+def mock_get_input(monkeypatch):
+    """A fixture for mocking get_input."""
+
+    def mock_input(*args, **kwargs):
+        if args[0] == "Enter name:":
+            return "Test User"
+        elif args[0] == "Enter email:":
+            return "test@example.com"
+        elif args[0] == "Enter password:":
+            return "password"
+        elif args[0] == "Enter role name:":
+            return "admin"
+
+    monkeypatch.setattr("epic.cli.user_cli.get_input", mock_input)
 
 
 # # list of module and class for each model
