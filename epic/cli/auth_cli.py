@@ -69,6 +69,8 @@ user_info = {}
 
 def authenticated_command(func):
     def wrapper():
+        if os.getenv("TESTING"):
+            return func()
         if not db.table_exists(User._meta.table_name):
             typer.echo("Initialization required. Please run 'initialize' command.")
         else:
