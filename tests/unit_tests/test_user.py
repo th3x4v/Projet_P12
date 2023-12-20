@@ -7,7 +7,7 @@ from typer.testing import CliRunner
 import os
 
 
-def test_create_user(monkeypatch, mock_user_info):
+def test_create_user(monkeypatch, mock_user_info, setup_database):
     """
     Test the create_user function
     """
@@ -16,12 +16,6 @@ def test_create_user(monkeypatch, mock_user_info):
     monkeypatch.setattr(
         "epic.cli.user_cli.get_input", lambda _, __, hide_input=False: inputs.pop(0)
     )
-    mock_user = MagicMock()
-    mock_role = MagicMock()
-
-    # Mock the create method of User and get method of Role
-    monkeypatch.setattr(User, "create", lambda **kwargs: mock_user)
-    monkeypatch.setattr(Role, "get", lambda **kwargs: mock_role)
 
     runner = CliRunner()
     result = runner.invoke(app, ["create"])
