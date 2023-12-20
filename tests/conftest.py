@@ -47,11 +47,12 @@ def mock_authenticated_command(monkeypatch):
 
     def mock_decorator(func):
         def wrapper(*args, **kwargs):
+            # Simulate a successful authentication by setting user_info
             return func(*args, **kwargs)
 
         return wrapper
 
-    monkeypatch.setattr("epic.cli.user_cli.authenticated_command", mock_decorator)
+    monkeypatch.setattr("epic.cli.auth_cli.authenticated_command", mock_decorator)
 
 
 @pytest.fixture
