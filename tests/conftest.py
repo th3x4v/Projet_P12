@@ -36,8 +36,7 @@ def temp_token_file(tmp_path):
 @pytest.fixture
 def mock_user_info(monkeypatch):
     # This fixture will mock the user_info dictionary
-    mock_info = {"user_id": 123, "role": "admin"}
-    monkeypatch.setattr("epic.cli.auth_cli.user_info", mock_info)
+    return {"user_id": 1, "role": "admin"}
 
 
 @pytest.fixture
@@ -47,8 +46,8 @@ def mock_authenticated_command(monkeypatch):
     """
 
     def mock_decorator(func):
-        def wrapper():
-            return func()
+        def wrapper(*args, **kwargs):
+            return func(*args, **kwargs)
 
         return wrapper
 
