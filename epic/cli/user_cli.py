@@ -134,7 +134,7 @@ def delete_user():
 
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
-        user_id = typer.prompt("Enter user ID:")
+        user_id = get_input("Enter user ID to delete", int)
         try:
             user = User.get(User.id == user_id)
             user.delete_instance()
@@ -266,7 +266,7 @@ def create_role():
         Role manager created successfully."""
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
-        name = typer.prompt("Enter role name:")
+        name = get_input("Enter name:", str)
         role = Role.create(name=name)
         typer.echo(f"Role {role.name} created successfully.")
     else:
@@ -319,7 +319,7 @@ def delete_role():
 
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
-        role_id = typer.prompt("Enter role ID:")
+        role_id = get_input("Enter role ID to delete role", int)
         try:
             role = Role.get(Role.id == role_id)
             role.delete_instance()

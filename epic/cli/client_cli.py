@@ -4,6 +4,7 @@ from peewee import DoesNotExist
 from epic.cli.auth_cli import authenticated_command
 from epic.cli.user_cli import method_allowed
 from epic.cli.auth_cli import user_info
+from epic.utils import get_input
 import inspect
 import os
 
@@ -42,13 +43,12 @@ def create_client():
     """
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
-        name = typer.prompt("Enter client name:")
-        email = typer.prompt("Enter client email:")
-        phone = typer.prompt("Enter client phone:")
-        company = typer.prompt("Enter client company:")
-        sales_contact_id = user_info["user_id"]
+        name = get_input("Enter client name:", str)
+        email = get_input("Enter client email:", "email")
+        phone = get_input("Enter client phone:", "phone")
+        company = get_input("Enter client company:", str)
         try:
-            sales_contact = User.get(User.id == int(sales_contact_id))
+            sales_contact = User.get(User.id == int(user_info["user_id"]))
             client = Client.create(
                 name=name,
                 email=email,
@@ -113,7 +113,7 @@ def delete_client():
     """
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
-        client_id = typer.prompt("Enter client ID:")
+        client_id = get_input("Enter client ID to update:", int)
         try:
             client = Client.get(Client.id == client_id)
             if client.sales_contact.id == user_info["user_id"]:
@@ -159,7 +159,7 @@ def update_client():
     """
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
-        client_id = typer.prompt("Enter client ID to update:")
+        client_id = get_input("Enter client ID to update:", int)
         try:
             client = Client.get(Client.id == client_id)
             try:
@@ -177,14 +177,19 @@ def update_client():
         except DoesNotExist:
             typer.echo(f"Client with ID {client_id} does not exist.")
 
-        name = typer.prompt("Enter new name or press 'Enter':", default=client.name)
-        email = typer.prompt("Enter new email or press 'Enter':", default=client.email)
-        phone = typer.prompt("Enter new phone or press 'Enter':", default=client.phone)
-        company = typer.prompt(
-            "Enter new company or press 'Enter':", default=client.company
+        name = get_input("Enter new name or press 'Enter':", str, default=client.name)
+        email = get_input(
+            "Enter new email or press 'Enter':", "email", default=client.email
         )
-        sales_contact_id = typer.prompt(
+        phone = get_input(
+            "Enter new phone or press 'Enter':", "phone", default=client.phone
+        )
+        company = get_input(
+            "Enter new company or press 'Enter':", str, default=client.company
+        )
+        sales_contact_id = get_input(
             "Enter new sales contact ID or press 'Enter':",
+            int,
             default=client.sales_contact.id,
         )
 

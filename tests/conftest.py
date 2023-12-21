@@ -40,7 +40,6 @@ def mock_user_info(monkeypatch):
     return {"user_id": 1, "role": "admin"}
 
 
-
 @pytest.fixture
 def mock_get_input(monkeypatch):
     """A fixture for mocking get_input."""
@@ -56,6 +55,11 @@ def mock_get_input(monkeypatch):
             return "admin"
 
     monkeypatch.setattr("epic.cli.user_cli.get_input", mock_input)
+
+
+@pytest.fixture
+def roles_data():
+    return ["admin", "sales", "support"]
 
 
 # # list of module and class for each model

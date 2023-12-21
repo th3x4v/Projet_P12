@@ -23,7 +23,7 @@ def mock_authenticated_command(monkeypatch):
 
         return wrapper
 
-    monkeypatch.setattr("epic.cli.user_cli.authenticated_command", mock_decorator)
+    monkeypatch.setattr("epic.cli.auth_cli.authenticated_command", mock_decorator)
 
 
 def test_create_user(
