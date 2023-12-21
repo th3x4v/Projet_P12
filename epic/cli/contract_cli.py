@@ -5,6 +5,7 @@ from epic.cli.auth_cli import authenticated_command
 from epic.cli.user_cli import method_allowed
 from epic.cli.auth_cli import user_info
 import inspect
+from epic.utils import get_input
 import os
 
 # Get the filename of the module
@@ -41,11 +42,13 @@ def create_contract():
         Is the contract signed? (True/False): True
         Contract Contract 1 created successfully.
     """
-    name = typer.prompt("Enter contract name:")
-    client_id = typer.prompt("Enter client ID:", type=int)
-    total_amount = typer.prompt("Enter total amount:", type=float)
-    due_amount = typer.prompt("Enter due amount:", type=float)
-    signed = typer.prompt("Is the contract signed? (True/False):", type=bool)
+    function_name = inspect.currentframe().f_code.co_name
+    if user_info["role"] in method_allowed[filename + "." + function_name]:
+        client_id = get_input("Enter client ID for the new contract:", int)
+        name = get_input("Enter contract name:", str)
+        signed = get_input("Is the contract signed? (True/False):", bool)
+        total_amount = get_input("Enter total amount:", float)
+        due_amount = get_input("Enter due amount:", float)
 
     try:
         client = Client.get(Client.id == client_id)
@@ -112,10 +115,11 @@ def delete_contract():
     """
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
-        contract_id = typer.prompt("Enter contract ID to delete:", type=int)
+        contract_id = get_input("Enter contract ID to delete:", int)
         try:
             contract = Contract.get(Contract.id == contract_id)
-            if contract.client.sales_contact.id == user_info["user_id"]:
+
+            if contract.client.sales_contact.id == user_info["user_id"] or user_info["role"] in ["admin", "super_admin"]:
                 contract.delete_instance()
                 typer.echo(f"Contract {contract.name} deleted successfully.")
             else:

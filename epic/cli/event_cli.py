@@ -4,6 +4,8 @@ from peewee import DoesNotExist
 from epic.cli.auth_cli import authenticated_command
 from epic.cli.user_cli import method_allowed
 from epic.cli.auth_cli import user_info
+from epic.utils import get_input
+from datetime import datetime
 
 import inspect
 import os
@@ -43,17 +45,35 @@ def create_event():
         Enter notes: Annual meeting of the company
         Event Annual Meeting created successfully.
     """
-    name = typer.prompt("Enter event name:")
-    contract_id = typer.prompt("Enter contract ID:", type=int)
-    support_contact_id = typer.prompt("Enter support contact ID:", type=int)
-    date_start = typer.prompt("Enter start date:")
-    date_end = typer.prompt("Enter end date:")
-    location = typer.prompt("Enter location:")
-    attendees = typer.prompt("Enter number of attendees:", type=int)
-    notes = typer.prompt("Enter notes:")
+    function_name = inspect.currentframe().f_code.co_name
+    if user_info["role"] in method_allowed[filename + "." + function_name]:
+        contract_id = get_input("Enter contract ID:", int)
+        try:
+            contract = Contract.get(Contract.id == contract_id)
+            if contract.client.sales_contact.id == user_info["user_id"] or user_info[
+                "role"
+            ] in ["admin", "super_admin"]:
+                if contract.signed == False:
+                    typer.echo("Contract is not signed. Not possible to create event.")
+                    return None
+            else:
+                typer.echo(
+                    "You do not have permission to create event for this contract ."
+                )
+                return None
+        except Contract.DoesNotExist:
+            typer.echo(f"Contract with ID {contract_id} does not exist.")
+            return None
+        name = get_input("Enter event name:", str)
+
+        support_contact_id = get_input("Enter support contact ID:", int)
+        date_start = get_input("Enter start date (YYYY-MM-DD):", "date")
+        date_end = get_input("Enter end date (YYYY-MM-DD):", "date")
+        location = get_input("Enter location:", str)
+        attendees = get_input("Enter number of attendees:", int)
+        notes = get_input("Enter notes:", str)
 
     try:
-        contract = Contract.get(Contract.id == contract_id)
         support_contact = User.get(User.id == support_contact_id)
         event = Event.create(
             name=name,
@@ -120,12 +140,13 @@ def delete_event():
     """
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
-        event_id = typer.prompt("Enter event ID to delete:")
+        event_id = get_input("Enter event ID to delete:", int)
         try:
             event = Event.get(Event.id == event_id)
             if (
                 user_info["role"] == "admin"
                 or user_info["user_id"] == event.support_contact.id
+                or event.contract.client.sales_contact.id
             ):
                 event.delete_instance()
                 typer.echo(f"Event {event.name} deleted successfully.")
@@ -170,15 +191,14 @@ def update_event():
     """
     function_name = inspect.currentframe().f_code.co_name
     if user_info["role"] in method_allowed[filename + "." + function_name]:
-        event_id = typer.prompt("Enter event ID to update:")
+        event_id = get_input("Enter event ID to delete:", int)
         try:
             event = Event.get(Event.id == event_id)
             try:
                 support_contact = User.get(User.id == event.support_contact.id)
-                if (
-                    event.support_contact.id == user_info["user_id"]
-                    or user_info["role"] == "admin"
-                ):
+                if event.support_contact.id == user_info["user_id"] or user_info[
+                    "role"
+                ] in ["admin", "super_admin"]:
                     typer.echo(
                         f"Contract ID: {event.id}, Name: {event.name}, Contract ID: {event.contract.id}, Location: {event.location}"
                     )
@@ -209,27 +229,30 @@ def update_event():
             )
             return None
 
-        name = typer.prompt("Enter new name or press 'Enter':", default=event.name)
-        contract_id = typer.prompt(
-            "Enter new contract ID or press 'Enter':", default=event.contract.id
+        name = get_input("Enter new name or press 'Enter':", str, default=event.name)
+        contract_id = get_input(
+            "Enter new contract ID or press 'Enter':", int, default=event.contract.id
         )
-        support_contact_id = typer.prompt(
+        support_contact_id = get_input(
             "Enter new support contact ID or press 'Enter':",
+            int,
             default=event.support_contact.id,
         )
-        date_start = typer.prompt(
-            "Enter new start date or press 'Enter':", default=event.date_start
+        date_start = get_input(
+            "Enter new start date or press 'Enter':", "date", default=event.date_start
         )
-        date_end = typer.prompt(
-            "Enter new end date or press 'Enter':", default=event.date_end
+        date_end = get_input(
+            "Enter new end date or press 'Enter':", "date", default=event.date_end
         )
-        location = typer.prompt(
-            "Enter new location or press 'Enter':", default=event.location
+        location = get_input(
+            "Enter new location or press 'Enter':", str, default=event.location
         )
-        attendees = typer.prompt(
-            "Enter new number of attendees or press 'Enter':", default=event.attendees
+        attendees = get_input(
+            "Enter new number of attendees or press 'Enter':",
+            int,
+            default=event.attendees,
         )
-        notes = typer.prompt("Enter new notes or press 'Enter':", default=event.notes)
+        notes = get_input("Enter new notes or press 'Enter':", str, default=event.notes)
 
         try:
             contract = Contract.get(Contract.id == contract_id)
@@ -282,6 +305,13 @@ def my_events():
         print(events)
         for event in events:
             typer.echo(f"Event ID: {event.id}, Name: {event.name}")
+    elif user_info["role"] == "sales":
+        events = Event.select()
+        for event in events:
+            if event.contract.client.sales_contact == user:
+                typer.echo(
+                    f"Event ID: {event.id}, Name: {event.name}, Contract ID: {event.contract.id}, Location: {event.location}"
+                )
     else:
         typer.echo("User not allowed to view events.")
 

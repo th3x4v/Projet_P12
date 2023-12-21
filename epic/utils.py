@@ -4,6 +4,7 @@ from rich.console import Console
 from rich.table import Table
 from epic.cli.initialize_cli import roles_data
 import re
+from datetime import datetime
 
 
 def get_input(prompt: str, input_type, **kwargs):
@@ -49,6 +50,11 @@ def validate_input(value, input_type):
     elif input_type == "role_name":
         if value.lower() in roles_data:
             return value
+    elif input_type == "date":
+        try:
+            return datetime.strptime(value, "%Y-%m-%d").date()
+        except ValueError:
+            raise ValueError("Invalid date. The format should be 'YYYY-MM-DD'.")
         else:
             raise ValueError(
                 "Invalid role name. Choose from 'admin', 'sales', or 'support'."

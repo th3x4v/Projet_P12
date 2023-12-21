@@ -116,7 +116,7 @@ def delete_client():
         client_id = get_input("Enter client ID to update:", int)
         try:
             client = Client.get(Client.id == client_id)
-            if client.sales_contact.id == user_info["user_id"]:
+            if client.sales_contact.id == user_info["user_id"] or user_info["role"] in ["admin", "super_admin"]:
                 client.delete_instance()
                 typer.echo(f"Client {client.name} deleted successfully.")
             else:
