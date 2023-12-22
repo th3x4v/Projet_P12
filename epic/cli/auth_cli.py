@@ -67,31 +67,34 @@ def store_token(token):
 user_info = {}
 
 
+def get_auth():
+    try:
+        with open("jwt_token.txt", "r") as token_file:
+            token = token_file.read().strip()
+            decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+            # Check if the token is not expired and has necessary information
+            if "user_id" in decoded_token and "role" in decoded_token:
+                # Store user information in the global dictionary
+                user_info["user_id"] = decoded_token["user_id"]
+                user_info["role"] = decoded_token["role"]
+                return True
+            else:
+                typer.echo("Invalid token. Please reauthenticate.")
+    except (
+        FileNotFoundError,
+        jwt.ExpiredSignatureError,
+        jwt.InvalidTokenError,
+    ):
+        typer.echo("Authentication required. Please run 'login' command.")
+
+
 def authenticated_command(func):
     def wrapper():
-        if os.getenv("TESTING"):
-            return func()
         if not db.table_exists(User._meta.table_name):
             typer.echo("Initialization required. Please run 'initialize' command.")
         else:
-            try:
-                with open("jwt_token.txt", "r") as token_file:
-                    token = token_file.read().strip()
-                    decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-                    # Check if the token is not expired and has necessary information
-                    if "user_id" in decoded_token and "role" in decoded_token:
-                        # Store user information in the global dictionary
-                        user_info["user_id"] = decoded_token["user_id"]
-                        user_info["role"] = decoded_token["role"]
-                        return func()
-                    else:
-                        typer.echo("Invalid token. Please reauthenticate.")
-            except (
-                FileNotFoundError,
-                jwt.ExpiredSignatureError,
-                jwt.InvalidTokenError,
-            ):
-                typer.echo("Authentication required. Please run 'login' command.")
+            if get_auth() == True:
+                return func()
 
     return wrapper
 

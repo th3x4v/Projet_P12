@@ -23,6 +23,58 @@ def setup_database():
     test_db.bind(MODELS, bind_refs=False, bind_backrefs=False)
     test_db.connect()
     test_db.create_tables(MODELS)
+    # Create roles
+    for role_name in ["admin", "sales", "support"]:
+        Role.create(name=role_name)
+    user = User.create(
+        name="Henry",
+        email="henry@example.com",
+        password="password",
+        role=Role.get(Role.name == "admin"),
+    )
+    user_admin = User.create(
+        name="Admin User",
+        email="admin@example.com",
+        password="salespassword",
+        role=Role.get(Role.name == "admin"),
+    )
+    user_sales = User.create(
+        name="Sales User",
+        email="sales@example.com",
+        password="salespassword",
+        role=Role.get(Role.name == "sales"),
+    )
+
+    user_support = User.create(
+        name="Support User",
+        email="support@example.com",
+        password="supportpassword",
+        role=Role.get(Role.name == "support"),
+    )
+    client = Client.create(
+        name="Test Client",
+        email="test@example.com",
+        phone=1234567890,
+        company="Test Company",
+        sales_contact=user_sales,
+    )
+    contract = Contract.create(
+        name="Test Contract",
+        client=client,
+        total_amount=1000,
+        due_amount=0.0,
+        signed=False,
+    )
+    event = Event.create(
+        name="Test Event",
+        contract=contract,
+        support_contact=user_support,
+        date_start="2021-01-01",
+        date_end="2021-01-01",
+        location="Sample Location",
+        attendees=10,
+        notes="Sample Notes",
+    )
     yield
     test_db.close()
 
@@ -41,25 +93,14 @@ def mock_user_info(monkeypatch):
 
 
 @pytest.fixture
-def mock_get_input(monkeypatch):
-    """A fixture for mocking get_input."""
-
-    def mock_input(*args, **kwargs):
-        if args[0] == "Enter name:":
-            return "Test User"
-        elif args[0] == "Enter email:":
-            return "test@example.com"
-        elif args[0] == "Enter password:":
-            return "password"
-        elif args[0] == "Enter role name:":
-            return "admin"
-
-    monkeypatch.setattr("epic.cli.user_cli.get_input", mock_input)
+def roles_data():
+    return ["admin", "sales", "support"]
 
 
 @pytest.fixture
-def roles_data():
-    return ["admin", "sales", "support"]
+def mock_get_auth(monkeypatch):
+    # Mock the get_auth function to always return True
+    monkeypatch.setattr("epic.cli.auth_cli.get_auth", lambda: True)
 
 
 # # list of module and class for each model
@@ -90,3 +131,44 @@ def roles_data():
 
 #     yield db
 #     db.close()
+
+
+# @pytest.fixture
+# def mock_get_input(monkeypatch):
+#     """A fixture for mocking get_input."""
+
+#     def mock_input(*args, **kwargs):
+#         if args[0] == "Enter name:":
+#             return "Test User"
+#         elif args[0] == "Enter email:":
+#             return "test@example.com"
+#         elif args[0] == "Enter password:":
+#             return "password"
+#         elif args[0] == "Enter role name:":
+#             return "admin"
+#         elif args[0] == "Enter phone number:":
+#             return "1234567890"
+#         elif args[0] == "Enter company name:":
+#             return "Test Company"
+#         elif args[0] == "Enter contract name:":
+#             return "Test Contract"
+#         elif args[0] == "Enter total amount:":
+#             return "1000"
+#         elif args[0] == "Enter due amount:":
+#             return "0.0"
+#         elif args[0] == "Enter signed (True/False):":
+#             return "False"
+#         elif args[0] == "Enter event name:":
+#             return "Test Event"
+#         elif args[0] == "Enter start date (YYYY-MM-DD):":
+#             return "2021-01-01"
+#         elif args[0] == "Enter end date (YYYY-MM-DD):":
+#             return "2021-01-01"
+#         elif args[0] == "Enter location:":
+#             return "Sample Location"
+#         elif args[0] == "Enter number of attendees:":
+#             return "10"
+#         elif args[0] == "Enter notes:":
+#             return "Sample Notes"
+
+#     monkeypatch.setattr("epic.cli.user_cli.get_input", mock_input)
