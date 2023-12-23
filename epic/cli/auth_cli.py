@@ -3,7 +3,40 @@ from epic.models.models import User, db
 import jwt
 import os
 
+user_auth = User()
+
+
+# def callback():
+#     def check_auth(ctx: typer.Context):
+#         print(ctx.invoked_subcommand)
+#         if ctx.invoked_subcommand in ["login", "logout", "list"]:
+#             return
+#         global user
+#         user = User.is_auth()
+#         print("user")
+#         print(user.name)
+#         if user is None:
+#             print("exit")
+#             exit()
+
+
 app = typer.Typer()
+
+
+@app.callback()
+def check_auth(ctx: typer.Context):
+    print(ctx.invoked_subcommand)
+    if ctx.invoked_subcommand in ["login", "logout", "list"]:
+        return
+
+    global user_auth
+    user_auth = User.is_auth()
+    print("user_auth")
+    print(user_auth.name)
+    if user_auth is None:
+        print("exit")
+        exit()
+
 
 SESSION_FILE = "jwt_token.txt"
 
@@ -61,6 +94,21 @@ def authenticate(email: str, password: str):
 def store_token(token):
     with open(SESSION_FILE, "w") as token_file:
         token_file.write(token)
+
+
+@app.callback()
+def check_auth(ctx: typer.Context):
+    print(ctx.invoked_subcommand)
+    if ctx.invoked_subcommand in ["login", "logout", "list"]:
+        return
+
+    global user
+    user = User.is_auth()
+    print("user")
+    print(user.name)
+    if user is None:
+        print("exit")
+        exit()
 
 
 # Global dictionary to store user information

@@ -12,6 +12,11 @@ import peewee
 import jwt
 from peewee import DoesNotExist
 import bcrypt
+import typer
+
+SESSION_FILE = "jwt_token.txt"
+
+SECRET_KEY = "your-secret-key"
 
 
 db = peewee.SqliteDatabase("database.db", pragmas={"foreign_keys": 1})
@@ -48,7 +53,6 @@ class User(BaseModel):
             password (str): The password for the new superuser.
         """
         admin_role = Role.get(Role.name == "super_admin")
-        # hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         User.create(name=name, email=email, password=password, role=admin_role)
 
     def save(self, *args, **kwargs):
@@ -99,6 +103,32 @@ class User(BaseModel):
         token = jwt.encode(payload, "your-secret-key", algorithm="HS256")
 
         return token
+
+    @staticmethod
+    def is_auth():
+        print("auth")
+        try:
+            with open("jwt_token.txt", "r") as token_file:
+                token = token_file.read().strip()
+                decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+                # Check if the token is not expired and has necessary information
+                if "user_id" in decoded_token and "role" in decoded_token:
+                    # Store user information in the instance
+                    print("user_id")
+                    print(decoded_token["user_id"])
+                    user = User.get_by_id(int(decoded_token["user_id"]))
+                    print("debug")
+                    return user
+                else:
+                    typer.echo("Invalid token. Please reauthenticate.")
+                    return None
+        except (
+            FileNotFoundError,
+            jwt.ExpiredSignatureError,
+            jwt.InvalidTokenError,
+        ):
+            typer.echo("Authentication required. Please run 'login' command.")
+            return None
 
 
 class Client(BaseModel):

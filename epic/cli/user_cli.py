@@ -12,6 +12,20 @@ from epic.utils import get_input, display_list
 app = typer.Typer()
 
 
+@app.callback()
+def check_auth(ctx: typer.Context):
+    print(ctx.invoked_subcommand)
+    if ctx.invoked_subcommand in ["login", "logout", "list"]:
+        return
+    global user_auth
+    user_auth = User.is_auth()
+    print("user_auth")
+    print(user_auth.name)
+    if user_auth is None:
+        print("exit")
+        exit()
+
+
 method_allowed = {
     "user_cli.create_user": ["admin", "super_admin"],
     "user_cli.list_users": ["admin", "super_admin"],
@@ -45,7 +59,6 @@ filename, _ = os.path.splitext(os.path.basename(os.path.abspath(__file__)))
 
 
 @app.command("create")
-@authenticated_command
 def create_user():
     """Create a new user
 
@@ -69,7 +82,8 @@ def create_user():
         Enter role name: admin
         User John Doe created successfully."""
     function_name = inspect.currentframe().f_code.co_name
-    if user_info["role"] in method_allowed[filename + "." + function_name]:
+    if user_auth.role.name in method_allowed[filename + "." + function_name]:
+        # if user_info["role"] in method_allowed[filename + "." + function_name]:
         name = get_input("Enter name:", str)
         email = get_input("Enter email:", "email")
         password = get_input("Enter password:", str, hide_input=True)
@@ -202,7 +216,7 @@ def update_user():
         print("User not allowed")
 
 
-@app.command("update-password")
+@app.command("password")
 @authenticated_command
 def update_password():
     """Updates the password of a user.
@@ -242,92 +256,6 @@ def update_password():
     else:
         typer.echo("You do not have permission to update this user password.")
 
-
-@app.command("create-role")
-@authenticated_command
-def create_role():
-    """Creates a new role.
-
-    This function prompts the user to enter the name of the role to create, and then creates a new role with the provided name.
-
-    Args:
-        name (str): The name of the role to create.
-
-    Returns:
-        None
-
-    Raises:
-        DoesNotExist: If a role with the same name already exists.
-
-    Example:
-        To create a new role with the name "manager", you can run the following command:
-        $ python -m epic user create-role
-        Enter role name: manager
-        Role manager created successfully."""
-    function_name = inspect.currentframe().f_code.co_name
-    if user_info["role"] in method_allowed[filename + "." + function_name]:
-        name = get_input("Enter name:", str)
-        role = Role.create(name=name)
-        typer.echo(f"Role {role.name} created successfully.")
-    else:
-        print("User not allowed")
-
-
-@app.command("list-roles")
-@authenticated_command
-def list_roles():
-    """Get a list of all roles in the system.
-
-    Args:
-        None
-
-    Returns:
-        A list of all roles in the system
-
-    Raises:
-        None
-
-    Example:
-        To get a list of all roles in the system, you can run the following command:
-        $ python -m epic user list-roles
-        Role ID: 1, Name: admin
-        Role ID: 2, Name: support
-        ..."""
-    roles = Role.select()
-    for role in roles:
-        typer.echo(f"Role ID: {role.id}, Name: {role.name}")
-
-
-@app.command("delete-role")
-@authenticated_command
-def delete_role():
-    """Deletes a role from the system.
-
-    Args:
-        role_id (int): The ID of the role to delete.
-
-    Returns:
-        None
-
-    Raises:
-        DoesNotExist: If the role with the specified ID does not exist.
-
-    Example:
-        To delete a role with the ID of 1, you can run the following command:
-        $ python -m epic user delete-role 1
-        Role with ID 1 deleted successfully."""
-
-    function_name = inspect.currentframe().f_code.co_name
-    if user_info["role"] in method_allowed[filename + "." + function_name]:
-        role_id = get_input("Enter role ID to delete role", int)
-        try:
-            role = Role.get(Role.id == role_id)
-            role.delete_instance()
-            typer.echo(f"Role {role.name} deleted successfully.")
-        except DoesNotExist:
-            typer.echo(f"Role with ID {role_id} does not exist.")
-    else:
-        print("User not allowed")
 
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ from epic.cli.auth_cli import app as auth_app
 from epic.cli.initialize_cli import app as init_app
 import typer
 import logging
+from epic.models.models import User
 
 
 def main_function():
