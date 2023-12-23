@@ -85,11 +85,18 @@ def temp_token_file(tmp_path):
     token_file.write_text("test_token_content")
     return token_file
 
-
 @pytest.fixture
-def mock_user_info(monkeypatch):
+def mock_user_info_admin(monkeypatch):
     # This fixture will mock the user_info dictionary
     return {"user_id": 1, "role": "admin"}
+
+@pytest.fixture
+def mock_user_info_sales(monkeypatch):
+    return {"user_id": 1, "role": "sales"}
+
+@pytest.fixture
+def mock_user_info_support(monkeypatch):
+    return {"user_id": 1, "role": "support"}
 
 
 @pytest.fixture

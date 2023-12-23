@@ -12,7 +12,7 @@ runner = CliRunner()
 
 def test_create_user(
     mock_get_auth,
-    mock_user_info,
+    mock_user_info_admin,
     setup_database,
     monkeypatch,
 ):
@@ -26,16 +26,19 @@ def test_create_user(
     monkeypatch.setattr(
         "epic.cli.user_cli.method_allowed", {"user_cli.create_user": ["admin"]}
     )
-    monkeypatch.setattr("epic.cli.user_cli.user_info", mock_user_info)
+    monkeypatch.setattr("epic.cli.user_cli.user_info", mock_user_info_admin)
     result = runner.invoke(app, ["create"])
 
     assert result.exit_code == 0
     assert "User Test1 User created successfully." in result.output
 
 
+role = "admin"
+
+
 def test_update_user(
     mock_get_auth,
-    mock_user_info,
+    mock_user_info_admin,
     setup_database,
     monkeypatch,
 ):
@@ -47,7 +50,7 @@ def test_update_user(
     monkeypatch.setattr(
         "epic.cli.user_cli.method_allowed", {"user_cli.update_user": ["admin"]}
     )
-    monkeypatch.setattr("epic.cli.user_cli.user_info", mock_user_info)
+    monkeypatch.setattr("epic.cli.user_cli.user_info", mock_user_info_admin)
     result = runner.invoke(app, ["update"])
 
     assert result.exit_code == 0
@@ -56,7 +59,7 @@ def test_update_user(
 
 def test_update_password(
     mock_get_auth,
-    mock_user_info,
+    mock_user_info_admin,
     setup_database,
     monkeypatch,
 ):
@@ -68,7 +71,7 @@ def test_update_password(
     monkeypatch.setattr(
         "epic.cli.user_cli.method_allowed", {"user_cli.update_password": ["admin"]}
     )
-    monkeypatch.setattr("epic.cli.user_cli.user_info", mock_user_info)
+    monkeypatch.setattr("epic.cli.user_cli.user_info", mock_user_info_admin)
     result = runner.invoke(app, ["update-password"])
     user = User.get_by_id(2)
 
@@ -82,7 +85,7 @@ def test_update_password(
 
 def test_delete_user(
     mock_get_auth,
-    mock_user_info,
+    mock_user_info_admin,
     setup_database,
     monkeypatch,
 ):
@@ -94,7 +97,7 @@ def test_delete_user(
     monkeypatch.setattr(
         "epic.cli.user_cli.method_allowed", {"user_cli.delete_user": ["admin"]}
     )
-    monkeypatch.setattr("epic.cli.user_cli.user_info", mock_user_info)
+    monkeypatch.setattr("epic.cli.user_cli.user_info", mock_user_info_admin)
     user = User.get_by_id(2)
     result = runner.invoke(app, ["delete"])
 
