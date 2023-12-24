@@ -34,14 +34,38 @@ class Role(BaseModel):
         return f"Role {self.name}"
 
 
+class Permission(BaseModel):
+    name = CharField(unique=True)
+
+
+class RolePermission(BaseModel):
+    role = ForeignKeyField(Role)
+    permission = ForeignKeyField(Permission)
+
+
 class User(BaseModel):
     name = CharField(max_length=50, null=False)
     email = CharField(max_length=50, unique=True)
     password = CharField(max_length=255, null=False)
     role = ForeignKeyField(Role, backref="users")
 
+    _permissions: list[str] = None
+
     def __str__(self):
         return f"User {self.name}"
+
+    def has_perm(self, permission: str):
+        """Return True if the user has the permission else False"""
+        if self._permissions is None:
+            query = (
+                Permission.select()
+                .join(RolePermission)
+                .join(Role)
+                .where(Role.name == self.role.name)
+            )
+            self._permissions = [perm.name for perm in query]
+            print(self._permissions)
+        return permission in self._permissions
 
     @staticmethod
     def create_superuser(name, email, password):
@@ -90,7 +114,7 @@ class User(BaseModel):
             str: The JWT token.
         """
         # Set the expiration time for the token (e.g., 1 hour)
-        expiration_time = datetime.utcnow() + timedelta(hours=0.1)
+        expiration_time = datetime.utcnow() + timedelta(hours=1)
 
         # Define the payload of the JWT, which includes the user ID, role, and expiration time
         payload = {
@@ -106,7 +130,6 @@ class User(BaseModel):
 
     @staticmethod
     def is_auth():
-        print("auth")
         try:
             with open("jwt_token.txt", "r") as token_file:
                 token = token_file.read().strip()
@@ -117,7 +140,6 @@ class User(BaseModel):
                     print("user_id")
                     print(decoded_token["user_id"])
                     user = User.get_by_id(int(decoded_token["user_id"]))
-                    print("debug")
                     return user
                 else:
                     typer.echo("Invalid token. Please reauthenticate.")

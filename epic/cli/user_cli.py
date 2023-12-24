@@ -1,7 +1,7 @@
 from epic.models.models import User, Role
 import typer
 from peewee import DoesNotExist
-from epic.cli.auth_cli import authenticated_command
+from epic.cli.auth_cli import check_auth
 import os
 from epic.cli.auth_cli import user_info
 import inspect
@@ -9,21 +9,7 @@ import bcrypt
 from epic.utils import get_input, display_list
 
 
-app = typer.Typer()
-
-
-@app.callback()
-def check_auth(ctx: typer.Context):
-    print(ctx.invoked_subcommand)
-    if ctx.invoked_subcommand in ["login", "logout", "list"]:
-        return
-    global user_auth
-    user_auth = User.is_auth()
-    print("user_auth")
-    print(user_auth.name)
-    if user_auth is None:
-        print("exit")
-        exit()
+app = typer.Typer(callback=check_auth)
 
 
 method_allowed = {
@@ -82,21 +68,20 @@ def create_user():
         Enter role name: admin
         User John Doe created successfully."""
     function_name = inspect.currentframe().f_code.co_name
-    if user_auth.role.name in method_allowed[filename + "." + function_name]:
-        # if user_info["role"] in method_allowed[filename + "." + function_name]:
-        name = get_input("Enter name:", str)
-        email = get_input("Enter email:", "email")
-        password = get_input("Enter password:", str, hide_input=True)
-        role_name = get_input("Enter role name:", "role_name")
-        try:
-            role = Role.get(Role.name == role_name)
+    # if user_auth.role.name in method_allowed[filename + "." + function_name]:
+    name = get_input("Enter name:", str)
+    email = get_input("Enter email:", "email")
+    password = get_input("Enter password:", str, hide_input=True)
+    role_name = get_input("Enter role name:", "role_name")
+    try:
+        role = Role.get(Role.name == role_name)
 
-            user = User.create(name=name, email=email, password=password, role=role)
-            typer.echo(f"User {user.name} created successfully.")
-        except DoesNotExist:
-            typer.echo(f"Role '{role_name}' does not exist.")
-    else:
-        print(" user not allowed")
+        user = User.create(name=name, email=email, password=password, role=role)
+        typer.echo(f"User {user.name} created successfully.")
+    except DoesNotExist:
+        typer.echo(f"Role '{role_name}' does not exist.")
+    # else:
+    #     print(" user not allowed")
 
 
 @app.command("list")
@@ -127,7 +112,6 @@ def list_users():
 
 
 @app.command("delete")
-@authenticated_command
 def delete_user():
     """Deletes a user from the system.
 
@@ -147,20 +131,19 @@ def delete_user():
         User John Doe deleted successfully."""
 
     function_name = inspect.currentframe().f_code.co_name
-    if user_info["role"] in method_allowed[filename + "." + function_name]:
-        user_id = get_input("Enter user ID to delete", int)
-        try:
-            user = User.get(User.id == user_id)
-            user.delete_instance()
-            typer.echo(f"User {user.name} deleted successfully.")
-        except DoesNotExist:
-            typer.echo(f"User with ID '{user_id}' does not exist.")
-    else:
-        print("User not allowed")
+    # if user_info["role"] in method_allowed[filename + "." + function_name]:
+    user_id = get_input("Enter user ID to delete", int)
+    try:
+        user = User.get(User.id == user_id)
+        user.delete_instance()
+        typer.echo(f"User {user.name} deleted successfully.")
+    except DoesNotExist:
+        typer.echo(f"User with ID '{user_id}' does not exist.")
+    # else:
+    #     print("User not allowed")
 
 
 @app.command("update")
-@authenticated_command
 def update_user():
     """Updates an existing user.
 
@@ -190,34 +173,33 @@ def update_user():
         User John Doe updated successfully."""
 
     function_name = inspect.currentframe().f_code.co_name
-    if user_info["role"] in method_allowed[filename + "." + function_name]:
-        # user_id = typer.prompt("Enter user ID to update")
-        user_id = get_input("Enter user ID to update", int)
-        try:
-            user = User.get(User.id == user_id)
-            typer.echo(
-                f"User ID: {user.id}, Name: {user.name}, Email: {user.email}, Role: {user.role.name}"
-            )
-        except DoesNotExist:
-            typer.echo(f"User with ID {user_id} does not exist.")
-        name = get_input("Enter new name or press 'Enter'", str, default=user.name)
-        email = get_input("Enter email", "email", default=user.email)
-        role_name = get_input("Enter role name", "role_name", default=user.role.name)
-        try:
-            role = Role.get(Role.name == role_name)
-            user.name = name
-            user.email = email
-            user.role = role
-            user.save()
-            typer.echo(f"User {user.name} updated successfully.")
-        except DoesNotExist:
-            typer.echo(f"Role '{role_name}' does not exist.")
-    else:
-        print("User not allowed")
+    # if user_info["role"] in method_allowed[filename + "." + function_name]:
+    # user_id = typer.prompt("Enter user ID to update")
+    user_id = get_input("Enter user ID to update", int)
+    try:
+        user = User.get(User.id == user_id)
+        typer.echo(
+            f"User ID: {user.id}, Name: {user.name}, Email: {user.email}, Role: {user.role.name}"
+        )
+    except DoesNotExist:
+        typer.echo(f"User with ID {user_id} does not exist.")
+    name = get_input("Enter new name or press 'Enter'", str, default=user.name)
+    email = get_input("Enter email", "email", default=user.email)
+    role_name = get_input("Enter role name", "role_name", default=user.role.name)
+    try:
+        role = Role.get(Role.name == role_name)
+        user.name = name
+        user.email = email
+        user.role = role
+        user.save()
+        typer.echo(f"User {user.name} updated successfully.")
+    except DoesNotExist:
+        typer.echo(f"Role '{role_name}' does not exist.")
+    # else:
+    #     print("User not allowed")
 
 
 @app.command("password")
-@authenticated_command
 def update_password():
     """Updates the password of a user.
 
@@ -237,12 +219,16 @@ def update_password():
         Enter new password:
         Confirm password:
         Password for user John Doe updated successfully."""
+    from epic.cli.auth_cli import user_auth
 
     user_id = get_input("Enter user ID to update password", int)
     function_name = inspect.currentframe().f_code.co_name
+    print(user_auth.id)
+    print("debug")
     if (
-        user_id == int(user_info["user_id"])
-        or user_info["role"] in method_allowed[filename + "." + function_name]
+        user_id == int(user_auth.id)
+        or user_auth.role.name == "admin"
+        or user_auth.role.name == "super_admin"
     ):
         new_password = get_input("Enter new password", str, hide_input=True)
         try:
@@ -255,7 +241,6 @@ def update_password():
 
     else:
         typer.echo("You do not have permission to update this user password.")
-
 
 
 if __name__ == "__main__":

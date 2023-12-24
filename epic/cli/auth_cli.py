@@ -6,6 +6,29 @@ import os
 user_auth = User()
 
 
+def check_auth(ctx: typer.Context):
+    command = ctx.invoked_subcommand
+    print(ctx.invoked_subcommand)
+    if command in ["login", "logout", "list"]:
+        return
+    global user_auth
+    user_auth = User.is_auth()
+    if user_auth is None:
+        exit()
+
+    permission_to_check = f"{ctx.info_name}-{command}"
+    check_permissions(user_auth, permission_to_check)
+
+
+def check_permissions(user: User, permission: str):
+    """Check if the user have permission. Exit the app if not"""
+    if not user.has_perm(permission):
+        print(f"You don't have the permission ({permission}) to do this action")
+        exit()
+
+
+app = typer.Typer(callback=check_auth)
+
 # def callback():
 #     def check_auth(ctx: typer.Context):
 #         print(ctx.invoked_subcommand)
@@ -18,24 +41,6 @@ user_auth = User()
 #         if user is None:
 #             print("exit")
 #             exit()
-
-
-app = typer.Typer()
-
-
-@app.callback()
-def check_auth(ctx: typer.Context):
-    print(ctx.invoked_subcommand)
-    if ctx.invoked_subcommand in ["login", "logout", "list"]:
-        return
-
-    global user_auth
-    user_auth = User.is_auth()
-    print("user_auth")
-    print(user_auth.name)
-    if user_auth is None:
-        print("exit")
-        exit()
 
 
 SESSION_FILE = "jwt_token.txt"
@@ -96,19 +101,19 @@ def store_token(token):
         token_file.write(token)
 
 
-@app.callback()
-def check_auth(ctx: typer.Context):
-    print(ctx.invoked_subcommand)
-    if ctx.invoked_subcommand in ["login", "logout", "list"]:
-        return
+# @app.callback()
+# def check_auth(ctx: typer.Context):
+#     print(ctx.invoked_subcommand)
+#     if ctx.invoked_subcommand in ["login", "logout", "list"]:
+#         return
 
-    global user
-    user = User.is_auth()
-    print("user")
-    print(user.name)
-    if user is None:
-        print("exit")
-        exit()
+#     global user
+#     user = User.is_auth()
+#     print("user")
+#     print(user.name)
+#     if user is None:
+#         print("exit")
+#         exit()
 
 
 # Global dictionary to store user information
