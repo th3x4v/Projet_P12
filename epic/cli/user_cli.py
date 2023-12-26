@@ -2,10 +2,6 @@ from epic.models.models import User, Role
 import typer
 from peewee import DoesNotExist
 from epic.cli.auth_cli import check_auth
-import os
-from epic.cli.auth_cli import user_info
-import inspect
-import bcrypt
 from epic.utils import get_input, display_list
 
 
@@ -40,10 +36,6 @@ method_allowed = {
 }
 
 
-# Get the filename of the module
-filename, _ = os.path.splitext(os.path.basename(os.path.abspath(__file__)))
-
-
 @app.command("create")
 def create_user():
     """Create a new user
@@ -67,12 +59,10 @@ def create_user():
         Enter password: password
         Enter role name: admin
         User John Doe created successfully."""
-    function_name = inspect.currentframe().f_code.co_name
-    # if user_auth.role.name in method_allowed[filename + "." + function_name]:
-    name = get_input("Enter name:", str)
-    email = get_input("Enter email:", "email")
-    password = get_input("Enter password:", str, hide_input=True)
-    role_name = get_input("Enter role name:", "role_name")
+    name = get_input("Enter name", str)
+    email = get_input("Enter email", "email")
+    password = get_input("Enter password", str, hide_input=True)
+    role_name = get_input("Enter role name", "role_name")
     try:
         role = Role.get(Role.name == role_name)
 
@@ -80,8 +70,6 @@ def create_user():
         typer.echo(f"User {user.name} created successfully.")
     except DoesNotExist:
         typer.echo(f"Role '{role_name}' does not exist.")
-    # else:
-    #     print(" user not allowed")
 
 
 @app.command("list")
@@ -130,8 +118,6 @@ def delete_user():
         1
         User John Doe deleted successfully."""
 
-    function_name = inspect.currentframe().f_code.co_name
-    # if user_info["role"] in method_allowed[filename + "." + function_name]:
     user_id = get_input("Enter user ID to delete", int)
     try:
         user = User.get(User.id == user_id)
@@ -139,8 +125,6 @@ def delete_user():
         typer.echo(f"User {user.name} deleted successfully.")
     except DoesNotExist:
         typer.echo(f"User with ID '{user_id}' does not exist.")
-    # else:
-    #     print("User not allowed")
 
 
 @app.command("update")
@@ -172,9 +156,6 @@ def update_user():
         admin
         User John Doe updated successfully."""
 
-    function_name = inspect.currentframe().f_code.co_name
-    # if user_info["role"] in method_allowed[filename + "." + function_name]:
-    # user_id = typer.prompt("Enter user ID to update")
     user_id = get_input("Enter user ID to update", int)
     try:
         user = User.get(User.id == user_id)
@@ -195,8 +176,6 @@ def update_user():
         typer.echo(f"User {user.name} updated successfully.")
     except DoesNotExist:
         typer.echo(f"Role '{role_name}' does not exist.")
-    # else:
-    #     print("User not allowed")
 
 
 @app.command("password")
@@ -222,14 +201,10 @@ def update_password():
     from epic.cli.auth_cli import user_auth
 
     user_id = get_input("Enter user ID to update password", int)
-    function_name = inspect.currentframe().f_code.co_name
-    print(user_auth.id)
-    print("debug")
-    if (
-        user_id == int(user_auth.id)
-        or user_auth.role.name == "admin"
-        or user_auth.role.name == "super_admin"
-    ):
+    if user_id == int(user_auth.id) or user_auth.role.name in [
+        "admin",
+        "super_admin",
+    ]:
         new_password = get_input("Enter new password", str, hide_input=True)
         try:
             user = User.get(User.id == user_id)

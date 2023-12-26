@@ -1,23 +1,15 @@
 import typer
 from epic.models.models import Event, Contract, User
 from peewee import DoesNotExist
-from epic.cli.auth_cli import authenticated_command
-from epic.cli.user_cli import method_allowed
-from epic.cli.auth_cli import user_info
+from epic.cli.auth_cli import check_auth
 from epic.utils import get_input
 from datetime import datetime
 
-import inspect
-import os
 
-# Get the filename of the module
-filename, _ = os.path.splitext(os.path.basename(os.path.abspath(__file__)))
-
-app = typer.Typer()
+app = typer.Typer(callback=check_auth)
 
 
 @app.command("create")
-@authenticated_command
 def create_event():
     """Create a new event
 
@@ -45,40 +37,36 @@ def create_event():
         Enter notes: Annual meeting of the company
         Event Annual Meeting created successfully.
     """
-    function_name = inspect.currentframe().f_code.co_name
-    if user_info["role"] in method_allowed[filename + "." + function_name]:
-        contract_id = get_input("Enter contract ID:", int)
-        try:
-            contract = Contract.get(Contract.id == contract_id)
-            if contract.client.sales_contact.id == user_info["user_id"] or user_info[
-                "role"
-            ] in ["admin", "super_admin"]:
-                if contract.signed == False:
-                    typer.echo("Contract is not signed. Not possible to create event.")
-                    return None
-            else:
-                typer.echo(
-                    "You do not have permission to create event for this contract ."
-                )
-                return None
-        except Contract.DoesNotExist:
-            typer.echo(f"Contract with ID {contract_id} does not exist.")
-            return None
-        name = get_input("Enter event name:", str)
+    from epic.cli.auth_cli import user_auth
 
-        support_contact_id = get_input("Enter support contact ID:", int)
-        date_start = get_input("Enter start date (YYYY-MM-DD):", "date")
-        date_end = get_input("Enter end date (YYYY-MM-DD):", "date")
-        location = get_input("Enter location:", str)
-        attendees = get_input("Enter number of attendees:", int)
-        notes = get_input("Enter notes:", str)
+    contract_id = get_input("Enter contract ID:", int)
+    try:
+        contract = Contract.get(Contract.id == contract_id)
+        if contract.client.sales_contact.id == user_auth.id or user_auth.role.name in [
+            "admin",
+            "super_admin",
+        ]:
+            if contract.signed == False:
+                typer.echo("Contract is not signed. Not possible to create event.")
+                return None
+        else:
+            typer.echo("Contract does not belong to you.")
+            return None
+    except Contract.DoesNotExist:
+        typer.echo(f"Contract with ID {contract_id} does not exist.")
+        return None
+    name = get_input("Enter event name:", str)
+
+    date_start = get_input("Enter start date (YYYY-MM-DD):", "date")
+    date_end = get_input("Enter end date (YYYY-MM-DD):", "date")
+    location = get_input("Enter location:", str)
+    attendees = get_input("Enter number of attendees:", int)
+    notes = get_input("Enter notes:", str)
 
     try:
-        support_contact = User.get(User.id == support_contact_id)
         event = Event.create(
             name=name,
             contract=contract,
-            support_contact=support_contact,
             date_start=date_start,
             date_end=date_end,
             location=location,
@@ -87,11 +75,10 @@ def create_event():
         )
         typer.echo(f"Event {event.name} created successfully.")
     except DoesNotExist:
-        typer.echo("Contract or support contact does not exist.")
+        typer.echo("Contract does not exist.")
 
 
 @app.command("list")
-@authenticated_command
 def list_events():
     """
     Lists all events in the database.
@@ -119,7 +106,6 @@ def list_events():
 
 
 @app.command("delete")
-@authenticated_command
 def delete_event():
     """Deletes an event based on the given event ID.
 
@@ -138,28 +124,29 @@ def delete_event():
         Event Annual Meeting deleted successfully.
 
     """
-    function_name = inspect.currentframe().f_code.co_name
-    if user_info["role"] in method_allowed[filename + "." + function_name]:
-        event_id = get_input("Enter event ID to delete:", int)
-        try:
-            event = Event.get(Event.id == event_id)
-            if (
-                user_info["role"] == "admin"
-                or user_info["user_id"] == event.support_contact.id
-                or event.contract.client.sales_contact.id
-            ):
-                event.delete_instance()
-                typer.echo(f"Event {event.name} deleted successfully.")
-            else:
-                typer.echo("You do not have permission to delete this event.")
-        except DoesNotExist:
-            typer.echo(f"Event with ID {event_id} does not exist.")
-    else:
-        print("User not allowed")
+    from epic.cli.auth_cli import user_auth
+
+    event_id = get_input("Enter event ID to delete:", int)
+    try:
+        event = Event.get(Event.id == event_id)
+        if (
+            user_auth.id == event.support_contact.id
+            or user_auth.id == event.contract.client.sales_contact.id
+            or user_auth.role.name
+            in [
+                "admin",
+                "super_admin",
+            ]
+        ):
+            event.delete_instance()
+            typer.echo(f"Event {event.name} deleted successfully.")
+        else:
+            typer.echo("You do not have permission to delete this event.")
+    except DoesNotExist:
+        typer.echo(f"Event with ID {event_id} does not exist.")
 
 
 @app.command("update")
-@authenticated_command
 def update_event():
     """
     Update an existing event.
@@ -189,96 +176,102 @@ def update_event():
         Enter new notes or press 'Enter': Annual meeting of the company
         Event Annual Meeting 2023 updated successfully.
     """
-    function_name = inspect.currentframe().f_code.co_name
-    if user_info["role"] in method_allowed[filename + "." + function_name]:
-        event_id = get_input("Enter event ID to delete:", int)
+    from epic.cli.auth_cli import user_auth
+
+    event_id = get_input("Enter event ID to delete:", int)
+    try:
+        event = Event.get(Event.id == event_id)
         try:
-            event = Event.get(Event.id == event_id)
-            try:
-                support_contact = User.get(User.id == event.support_contact.id)
-                if event.support_contact.id == user_info["user_id"] or user_info[
-                    "role"
-                ] in ["admin", "super_admin"]:
-                    typer.echo(
-                        f"Contract ID: {event.id}, Name: {event.name}, Contract ID: {event.contract.id}, Location: {event.location}"
-                    )
-                else:
-                    typer.echo(f"Contract {event.name} does not belong to you.")
-                    return None
-            except DoesNotExist:
-                if user_info["role"] == "admin":
-                    support_contact_id = typer.prompt(
-                        "Enter support contact ID to update:"
-                    )
-                    try:
-                        sales_contact = User.get(User.id == support_contact_id)
-                        event.sales_contact = support_contact
-                        event.save()
-                        typer.echo(f"Event {event.name} updated successfully.")
-                    except DoesNotExist:
-                        typer.echo(
-                            f"Sales contact with ID '{support_contact_id}' does not exist."
-                        )
-                else:
-                    typer.echo(
-                        "Support contact does not exist. Contact an administator."
-                    )
+            support_contact = User.get(User.id == event.support_contact.id)
+            if (
+                user_auth.id == event.support_contact.id
+                or user_auth.id == event.contract.client.sales_contact.id
+                or user_auth.role.name
+                in [
+                    "admin",
+                    "super_admin",
+                ]
+            ):
+                typer.echo(
+                    f"Contract ID: {event.id}, Name: {event.name}, Contract ID: {event.contract.id}, Location: {event.location}"
+                )
+            else:
+                typer.echo(f"Contract {event.name} does not belong to you.")
+                return None
         except DoesNotExist:
-            typer.echo(
-                f"Event with ID {event_id} or Contract or support contact does not exist."
-            )
-            return None
-
-        name = get_input("Enter new name or press 'Enter':", str, default=event.name)
-        contract_id = get_input(
-            "Enter new contract ID or press 'Enter':", int, default=event.contract.id
+            if user_auth.role.name in [
+                "admin",
+                "super_admin",
+            ]:
+                support_contact_id = get_input(
+                    "Enter support contact ID to update", int
+                )
+                try:
+                    support_contact = User.get(
+                        User.id == support_contact_id, User.role.name == "support"
+                    )
+                    event.support_contact = support_contact
+                    event.save()
+                    typer.echo(f"Event {event.name} updated successfully.")
+                except DoesNotExist:
+                    typer.echo(
+                        f"Support contact with ID '{support_contact_id}' does not exist."
+                    )
+            else:
+                typer.echo("Support contact does not exist. Contact an administator.")
+    except DoesNotExist:
+        typer.echo(
+            f"Event with ID {event_id} or Contract or support contact does not exist."
         )
-        support_contact_id = get_input(
-            "Enter new support contact ID or press 'Enter':",
-            int,
-            default=event.support_contact.id,
-        )
-        date_start = get_input(
-            "Enter new start date or press 'Enter':", "date", default=event.date_start
-        )
-        date_end = get_input(
-            "Enter new end date or press 'Enter':", "date", default=event.date_end
-        )
-        location = get_input(
-            "Enter new location or press 'Enter':", str, default=event.location
-        )
-        attendees = get_input(
-            "Enter new number of attendees or press 'Enter':",
-            int,
-            default=event.attendees,
-        )
-        notes = get_input("Enter new notes or press 'Enter':", str, default=event.notes)
+        return None
 
-        try:
-            contract = Contract.get(Contract.id == contract_id)
-            support_contact = User.get(User.id == support_contact_id)
+    name = get_input("Enter new name or press 'Enter':", str, default=event.name)
+    contract_id = get_input(
+        "Enter new contract ID or press 'Enter':", int, default=event.contract.id
+    )
+    support_contact_id = get_input(
+        "Enter new support contact ID or press 'Enter':",
+        int,
+        default=event.support_contact.id,
+    )
+    date_start = get_input(
+        "Enter new start date or press 'Enter':", "date", default=event.date_start
+    )
+    date_end = get_input(
+        "Enter new end date or press 'Enter':", "date", default=event.date_end
+    )
+    location = get_input(
+        "Enter new location or press 'Enter':", str, default=event.location
+    )
+    attendees = get_input(
+        "Enter new number of attendees or press 'Enter':",
+        int,
+        default=event.attendees,
+    )
+    notes = get_input("Enter new notes or press 'Enter':", str, default=event.notes)
 
-            event.name = name
-            event.contract = contract
-            event.support_contact = support_contact
-            event.date_start = date_start
-            event.date_end = date_end
-            event.location = location
-            event.attendees = attendees
-            event.notes = notes
+    try:
+        contract = Contract.get(Contract.id == contract_id)
+        support_contact = User.get(User.id == support_contact_id)
 
-            event.save()
-            typer.echo(f"Event {event.name} updated successfully.")
-        except DoesNotExist:
-            typer.echo(
-                f"Contract with ID {contract_id} or support contact with ID {support_contact_id} does not exist."
-            )
-    else:
-        print("User not allowed")
+        event.name = name
+        event.contract = contract
+        event.support_contact = support_contact
+        event.date_start = date_start
+        event.date_end = date_end
+        event.location = location
+        event.attendees = attendees
+        event.notes = notes
+
+        event.save()
+        typer.echo(f"Event {event.name} updated successfully.")
+    except DoesNotExist:
+        typer.echo(
+            f"Contract with ID {contract_id} or support contact with ID {support_contact_id} does not exist."
+        )
 
 
-@app.command("my_events")
-@authenticated_command
+@app.command("read")
 def my_events():
     """
     Returns a list of events that the user is associated with.
@@ -298,17 +291,20 @@ def my_events():
         Event ID: 1, Name: Annual Meeting
         Event ID: 2, Name: Customer Conference
     """
-    user = User.get_by_id(user_info["user_id"])
-    if user_info["role"] == "support":
-        events = user.events  # Access events through the relationship defined in models
+    from epic.cli.auth_cli import user_auth
+
+    if user_auth.role.name == "support":
+        events = (
+            user_auth.events
+        )  # Access events through the relationship defined in models
         print("events")
         print(events)
         for event in events:
             typer.echo(f"Event ID: {event.id}, Name: {event.name}")
-    elif user_info["role"] == "sales":
+    elif user_auth.role.name == "sales":
         events = Event.select()
         for event in events:
-            if event.contract.client.sales_contact == user:
+            if event.contract.client.sales_contact == user_auth:
                 typer.echo(
                     f"Event ID: {event.id}, Name: {event.name}, Contract ID: {event.contract.id}, Location: {event.location}"
                 )

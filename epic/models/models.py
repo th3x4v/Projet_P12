@@ -198,7 +198,7 @@ class Contract(BaseModel):
 class Event(BaseModel):
     name = CharField(max_length=50, null=False)
     contract = ForeignKeyField(Contract, backref="events")
-    support_contact = ForeignKeyField(User, backref="events")
+    support_contact = ForeignKeyField(User, null=True, default=None, backref="events")
     date_start = DateTimeField()
     date_end = DateTimeField()
     location = CharField(max_length=50)

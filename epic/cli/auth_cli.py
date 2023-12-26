@@ -1,5 +1,6 @@
 import typer
 from epic.models.models import User, db
+from epic.utils import get_input
 import jwt
 import os
 
@@ -29,20 +30,6 @@ def check_permissions(user: User, permission: str):
 
 app = typer.Typer(callback=check_auth)
 
-# def callback():
-#     def check_auth(ctx: typer.Context):
-#         print(ctx.invoked_subcommand)
-#         if ctx.invoked_subcommand in ["login", "logout", "list"]:
-#             return
-#         global user
-#         user = User.is_auth()
-#         print("user")
-#         print(user.name)
-#         if user is None:
-#             print("exit")
-#             exit()
-
-
 SESSION_FILE = "jwt_token.txt"
 
 SECRET_KEY = "your-secret-key"
@@ -61,8 +48,8 @@ def login():
     str: The JWT token if the login is successful, None otherwise.
 
     """
-    email = typer.prompt("Enter email:")
-    password = typer.prompt("Enter password:", hide_input=True)
+    email = get_input("Enter email", "email")
+    password = get_input("Enter password", str, hide_input=True)
     token = authenticate(email, password)
     if token:
         store_token(token)

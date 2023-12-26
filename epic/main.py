@@ -4,6 +4,7 @@ from epic.cli.contract_cli import app as contract_app
 from epic.cli.client_cli import app as client_app
 from epic.cli.auth_cli import app as auth_app
 from epic.cli.initialize_cli import app as init_app
+from epic.cli.role_cli import app as role_app
 import typer
 import logging
 from epic.models.models import User
@@ -21,6 +22,7 @@ def main_function():
     app.add_typer(contract_app, name="contract")
     app.add_typer(client_app, name="client")
     app.add_typer(auth_app, name="auth")
+    app.add_typer(role_app, name="role")
 
     app()
 
