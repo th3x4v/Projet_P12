@@ -13,7 +13,7 @@ runner = CliRunner()
 def test_create_user(
     mock_has_perm,
     setup_database,
-    mock_is_auth,
+    mock_is_auth_admin,
     monkeypatch,
 ):
     mock_get_input = Mock(
@@ -28,7 +28,7 @@ def test_create_user(
 
 
 def test_update_user(
-    mock_is_auth,
+    mock_is_auth_admin,
     mock_has_perm,
     setup_database,
     monkeypatch,
@@ -45,15 +45,13 @@ def test_update_user(
 
 
 def test_update_password(
-    mock_is_auth,
+    mock_is_auth_admin,
     mock_has_perm,
     setup_database,
     monkeypatch,
 ):
     mock_get_input = Mock(side_effect=[2, "passwordtest"])
-    monkeypatch.setattr(
-        "epic.cli.user_cli.get_input", mock_get_input
-    )  # Replace with actual module name
+    monkeypatch.setattr("epic.cli.user_cli.get_input", mock_get_input)
 
     result = runner.invoke(app, ["password"])
     user = User.get_by_id(2)
@@ -67,7 +65,7 @@ def test_update_password(
 
 
 def test_delete_user(
-    mock_is_auth,
+    mock_is_auth_admin,
     mock_has_perm,
     setup_database,
     monkeypatch,

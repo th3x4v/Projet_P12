@@ -95,40 +95,32 @@ def mock_has_perm(monkeypatch):
 
 
 @pytest.fixture
-def mock_is_auth(monkeypatch):
+def mock_is_auth_admin(monkeypatch):
     def mock_return():
         return User.get_by_id(2)
 
-    monkeypatch.setattr(
-        "epic.cli.auth_cli.User.is_auth", mock_return
-    )  # replace 'your_module' with the actual module name
+    monkeypatch.setattr("epic.cli.auth_cli.User.is_auth", mock_return)
 
 
 @pytest.fixture
-def mock_user_info_admin(monkeypatch):
-    # This fixture will mock the user_info dictionary
-    return {"user_id": 1, "role": "admin"}
+def mock_is_auth_sales(monkeypatch):
+    def mock_return():
+        return User.get_by_id(3)
+
+    monkeypatch.setattr("epic.cli.auth_cli.User.is_auth", mock_return)
 
 
 @pytest.fixture
-def mock_user_info_sales(monkeypatch):
-    return {"user_id": 1, "role": "sales"}
+def mock_is_auth_support(monkeypatch):
+    def mock_return():
+        return User.get_by_id(4)
 
-
-@pytest.fixture
-def mock_user_info_support(monkeypatch):
-    return {"user_id": 1, "role": "support"}
+    monkeypatch.setattr("epic.cli.auth_cli.User.is_auth", mock_return)
 
 
 @pytest.fixture
 def roles_data():
     return ["admin", "sales", "support"]
-
-
-@pytest.fixture
-def mock_get_auth(monkeypatch):
-    # Mock the get_auth function to always return True
-    monkeypatch.setattr("epic.cli.auth_cli.get_auth", lambda: True)
 
 
 # # list of module and class for each model

@@ -187,7 +187,7 @@ def update_client():
         client.email = email
         client.phone = phone
         client.company = company
-        client.sales_contact = sales_contact
+        client.sales_contact = User.get(User.id == sales_contact_id)
         client.save()
         typer.echo(f"Client {client.name} updated successfully.")
     except DoesNotExist:
