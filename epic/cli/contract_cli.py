@@ -38,9 +38,9 @@ def create_contract():
 
     client_id = get_input("Enter client ID for the new contract", int)
 
-    if client.sales_contact.id == user_auth.id:
-        try:
-            client = Client.get(Client.id == client_id)
+    try:
+        client = Client.get(Client.id == client_id)
+        if client.sales_contact.id == user_auth.id:
             name = get_input("Enter contract name", str)
             signed = get_input("Is the contract signed? (True/False)", bool)
             total_amount = get_input("Enter total amount", float)
@@ -53,11 +53,10 @@ def create_contract():
                 signed=signed,
             )
             typer.echo(f"Contract {contract.name} created successfully.")
-        except DoesNotExist:
-            typer.echo("Client does not exist.")
-
-    else:
-        typer.echo(f"Client {client.name} does not belong to you.")
+        else:
+            typer.echo(f"Client {client.name} does not belong to you.")
+    except DoesNotExist:
+        typer.echo("Client does not exist.")
 
 
 @app.command("list")
@@ -153,7 +152,7 @@ def update_contract():
     """
     from epic.cli.auth_cli import user_auth
 
-    contract_id = typer.prompt("Enter contract ID to update:")
+    contract_id = get_input("Enter contract ID to update", int)
     try:
         contract = Contract.get(Contract.id == contract_id)
 
@@ -170,16 +169,14 @@ def update_contract():
     except DoesNotExist:
         typer.echo(f"Contract with ID {contract_id} does not exist.")
 
-    name = typer.prompt("Enter new name or press 'Enter':", default=contract.name)
-    signed = typer.prompt(
-        "Is the contract signed? (True/False):", type=bool, default=contract.signed
+    name = get_input("Enter new name or press 'Enter'", str, default=contract.name)
+    signed = get_input(
+        "Is the contract signed? (True/False)", bool, default=contract.signed
     )
-    total_amount = typer.prompt(
-        "Enter new total amount:", type=float, default=contract.total_amount
+    total_amount = get_input(
+        "Enter new total amount", float, default=contract.total_amount
     )
-    due_amount = typer.prompt(
-        "Enter new due amount:", type=float, default=contract.due_amount
-    )
+    due_amount = get_input("Enter new due amount:", float, default=contract.due_amount)
 
     contract.name = name
     contract.signed = signed
