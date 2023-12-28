@@ -4,7 +4,7 @@ from epic.utils import get_input
 import jwt
 import os
 
-user_auth = User()
+user_auth = None
 
 
 def check_auth(ctx: typer.Context):

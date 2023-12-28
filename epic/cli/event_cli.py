@@ -226,9 +226,6 @@ def update_event():
         return None
 
     name = get_input("Enter new name or press 'Enter':", str, default=event.name)
-    contract_id = get_input(
-        "Enter new contract ID or press 'Enter':", int, default=event.contract.id
-    )
     support_contact_id = get_input(
         "Enter new support contact ID or press 'Enter':",
         int,
@@ -251,11 +248,9 @@ def update_event():
     notes = get_input("Enter new notes or press 'Enter':", str, default=event.notes)
 
     try:
-        contract = Contract.get(Contract.id == contract_id)
         support_contact = User.get(User.id == support_contact_id)
 
         event.name = name
-        event.contract = contract
         event.support_contact = support_contact
         event.date_start = date_start
         event.date_end = date_end
@@ -266,9 +261,7 @@ def update_event():
         event.save()
         typer.echo(f"Event {event.name} updated successfully.")
     except DoesNotExist:
-        typer.echo(
-            f"Contract with ID {contract_id} or support contact with ID {support_contact_id} does not exist."
-        )
+        typer.echo(f"Support contact with ID {support_contact_id} does not exist.")
 
 
 @app.command("read")

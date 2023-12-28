@@ -112,10 +112,9 @@ def test_save_updates_date(setup_database):
     Raises:
         AssertionError: If the date_updated field is not updated.
     """
-    role = Role.create(name="sales")
     user = User.create(
-        name="Henry",
-        email="henry@example.com",
+        name="Henry test",
+        email="henry_test@example.com",
         password="password",
         role=Role.get(Role.name == "sales"),
     )

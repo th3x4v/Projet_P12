@@ -88,7 +88,7 @@ def delete_role():
     try:
         role = Role.get(Role.id == role_id)
         role.delete_instance()
-        typer.echo(f"Role {role.name} deleted successfully.")
+        typer.echo(f"Role deleted successfully.")
     except DoesNotExist:
         typer.echo(f"Role with ID {role_id} does not exist.")
 

@@ -50,15 +50,15 @@ def validate_input(value, input_type):
     elif input_type == "role_name":
         if value.lower() in roles_data:
             return value
+        else:
+            raise ValueError(
+                "Invalid role name. Choose from 'admin', 'sales', or 'support'."
+            )
     elif input_type == "date":
         try:
             return datetime.strptime(value, "%Y-%m-%d").date()
         except ValueError:
             raise ValueError("Invalid date. The format should be 'YYYY-MM-DD'.")
-        else:
-            raise ValueError(
-                "Invalid role name. Choose from 'admin', 'sales', or 'support'."
-            )
     else:
         raise ValueError("Invalid input type.")
 

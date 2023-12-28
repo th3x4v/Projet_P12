@@ -2,6 +2,11 @@
 import pytest
 from epic.utils import get_input, validate_input
 from typer.testing import CliRunner
+from epic.utils import display_list
+import unittest
+from unittest.mock import patch, call
+from rich.console import Console
+from rich.table import Table
 
 runner = CliRunner()
 

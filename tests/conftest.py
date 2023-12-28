@@ -3,8 +3,6 @@ from peewee import SqliteDatabase
 from epic.models.models import User, Client, Contract, Event, Role
 from unittest.mock import patch, MagicMock
 from epic.cli.auth_cli import user_info
-from epic.cli.auth_cli import authenticated_command
-from functools import wraps
 
 MODELS = [User, Client, Contract, Event, Role]
 
@@ -63,7 +61,7 @@ def setup_database():
         client=client,
         total_amount=1000,
         due_amount=0.0,
-        signed=False,
+        signed=True,
     )
     event = Event.create(
         name="Test Event",
@@ -77,6 +75,13 @@ def setup_database():
     )
     yield
     test_db.close()
+
+
+@pytest.fixture
+def mock_create_permissions(monkeypatch):
+    mock = MagicMock()
+    monkeypatch.setattr("epic.cli.initialize_cli.create_permissions", mock)
+    return mock
 
 
 @pytest.fixture
@@ -121,74 +126,3 @@ def mock_is_auth_support(monkeypatch):
 @pytest.fixture
 def roles_data():
     return ["admin", "sales", "support"]
-
-
-# # list of module and class for each model
-# all_models = [
-#     {"module": user, "class": "User"},
-#     # {"module": contract, "class": "Contract"},
-# ]
-
-
-# def _link_class_to_db(db) -> list:
-#     """link the database meta attribut to classes and return the classes list from models"""
-#     models = []
-#     for item in all_models:
-#         model = getattr(item.get("module"), item.get("class"))
-#         model._meta.database = db
-#         models.append(model)
-#     return models
-
-
-# @pytest.fixture(scope="session")
-# def in_memory_db():
-#     """Return an in memory SQLite db for the session"""
-
-#     db = SqliteDatabase(":memory:")
-#     db.connect()
-#     all_models = _link_class_to_db(db)
-#     db.create_tables(all_models)
-
-#     yield db
-#     db.close()
-
-
-# @pytest.fixture
-# def mock_get_input(monkeypatch):
-#     """A fixture for mocking get_input."""
-
-#     def mock_input(*args, **kwargs):
-#         if args[0] == "Enter name:":
-#             return "Test User"
-#         elif args[0] == "Enter email:":
-#             return "test@example.com"
-#         elif args[0] == "Enter password:":
-#             return "password"
-#         elif args[0] == "Enter role name:":
-#             return "admin"
-#         elif args[0] == "Enter phone number:":
-#             return "1234567890"
-#         elif args[0] == "Enter company name:":
-#             return "Test Company"
-#         elif args[0] == "Enter contract name:":
-#             return "Test Contract"
-#         elif args[0] == "Enter total amount:":
-#             return "1000"
-#         elif args[0] == "Enter due amount:":
-#             return "0.0"
-#         elif args[0] == "Enter signed (True/False):":
-#             return "False"
-#         elif args[0] == "Enter event name:":
-#             return "Test Event"
-#         elif args[0] == "Enter start date (YYYY-MM-DD):":
-#             return "2021-01-01"
-#         elif args[0] == "Enter end date (YYYY-MM-DD):":
-#             return "2021-01-01"
-#         elif args[0] == "Enter location:":
-#             return "Sample Location"
-#         elif args[0] == "Enter number of attendees:":
-#             return "10"
-#         elif args[0] == "Enter notes:":
-#             return "Sample Notes"
-
-#     monkeypatch.setattr("epic.cli.user_cli.get_input", mock_input)
