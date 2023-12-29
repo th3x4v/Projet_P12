@@ -7,7 +7,6 @@ from epic.cli.initialize_cli import app as init_app
 from epic.cli.role_cli import app as role_app
 import typer
 import logging
-from epic.models.models import User
 from epic.init_sentry import sentry_sdk
 
 

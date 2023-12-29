@@ -3,7 +3,6 @@ from epic.models.models import Event, Contract, User
 from peewee import DoesNotExist
 from epic.cli.auth_cli import check_auth
 from epic.utils import get_input
-from datetime import datetime
 
 
 app = typer.Typer(callback=check_auth)
@@ -46,7 +45,7 @@ def create_event():
             "admin",
             "super_admin",
         ]:
-            if contract.signed == False:
+            if contract.signed is False:
                 typer.echo("Contract is not signed. Not possible to create event.")
                 return None
         else:

@@ -156,11 +156,10 @@ def initialize():
     Initialize the database
     """
     with db:
-        if db.is_closed() == True:
+        if db.is_closed() is True:
             db.connect()
         create_tables()
         initialize_roles()
-        super_admin = Role.get(Role.name == "super_admin")
         sales = Role.get(Role.name == "sales")
         support = Role.get(Role.name == "support")
         admin = Role.get(Role.name == "admin")
@@ -285,5 +284,4 @@ def initialize():
             attendees=200,
             notes="Lorem ipsum dolor sit amet.",
         )
-
-        typer.echo(f"Project initialized successfully.")
+        typer.echo("Project initialized successfully.")

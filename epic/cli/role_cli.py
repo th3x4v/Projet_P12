@@ -1,13 +1,8 @@
-from epic.models.models import User, Role
+from epic.models.models import Role
 import typer
 from peewee import DoesNotExist
-from epic.cli.auth_cli import authenticated_command
-import os
-from epic.cli.auth_cli import user_info, check_auth
-import inspect
-import bcrypt
-from epic.utils import get_input, display_list
-from epic.cli.user_cli import method_allowed
+from epic.cli.auth_cli import check_auth
+from epic.utils import get_input
 
 
 app = typer.Typer(callback=check_auth)
@@ -88,7 +83,7 @@ def delete_role():
     try:
         role = Role.get(Role.id == role_id)
         role.delete_instance()
-        typer.echo(f"Role deleted successfully.")
+        typer.echo("Role deleted successfully.")
     except DoesNotExist:
         typer.echo(f"Role with ID {role_id} does not exist.")
 

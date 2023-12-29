@@ -1,5 +1,5 @@
 import typer
-from epic.models.models import Contract, Client, User
+from epic.models.models import Contract, Client
 from peewee import DoesNotExist
 from epic.cli.auth_cli import check_auth
 from epic.utils import get_input

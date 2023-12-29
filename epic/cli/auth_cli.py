@@ -1,7 +1,6 @@
 import typer
-from epic.models.models import User, db
+from epic.models.models import User
 from epic.utils import get_input
-import jwt
 import os
 
 user_auth = None
@@ -86,57 +85,6 @@ def authenticate(email: str, password: str):
 def store_token(token):
     with open(SESSION_FILE, "w") as token_file:
         token_file.write(token)
-
-
-# @app.callback()
-# def check_auth(ctx: typer.Context):
-#     print(ctx.invoked_subcommand)
-#     if ctx.invoked_subcommand in ["login", "logout", "list"]:
-#         return
-
-#     global user
-#     user = User.is_auth()
-#     print("user")
-#     print(user.name)
-#     if user is None:
-#         print("exit")
-#         exit()
-
-
-# Global dictionary to store user information
-user_info = {}
-
-
-def get_auth():
-    try:
-        with open("jwt_token.txt", "r") as token_file:
-            token = token_file.read().strip()
-            decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-            # Check if the token is not expired and has necessary information
-            if "user_id" in decoded_token and "role" in decoded_token:
-                # Store user information in the global dictionary
-                user_info["user_id"] = decoded_token["user_id"]
-                user_info["role"] = decoded_token["role"]
-                return True
-            else:
-                typer.echo("Invalid token. Please reauthenticate.")
-    except (
-        FileNotFoundError,
-        jwt.ExpiredSignatureError,
-        jwt.InvalidTokenError,
-    ):
-        typer.echo("Authentication required. Please run 'login' command.")
-
-
-def authenticated_command(func):
-    def wrapper():
-        if not db.table_exists(User._meta.table_name):
-            typer.echo("Initialization required. Please run 'initialize' command.")
-        else:
-            if get_auth() == True:
-                return func()
-
-    return wrapper
 
 
 if __name__ == "__main__":

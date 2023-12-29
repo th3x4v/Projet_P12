@@ -1,5 +1,4 @@
 import typer
-from email.utils import parseaddr
 from rich.console import Console
 from rich.table import Table
 from epic.cli.initialize_cli import roles_data
