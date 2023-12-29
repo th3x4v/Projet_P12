@@ -1,6 +1,19 @@
 import pytest
-from epic.cli.initialize_cli import create_tables, app, initialize_roles
-from epic.models.models import User, Client, Contract, Event, Role
+from epic.cli.initialize_cli import (
+    create_tables,
+    app,
+    initialize_roles,
+    create_permissions,
+)
+from epic.models.models import (
+    User,
+    Client,
+    Contract,
+    Event,
+    Role,
+    RolePermission,
+    Permission,
+)
 from typer.testing import CliRunner
 
 
@@ -28,12 +41,12 @@ def test_initialize_roles(database, monkeypatch):
     assert Role.select().where(Role.name == "super_admin").exists() == True
 
 
-def test_initialize(database, monkeypatch, mock_create_permissions):
+def test_initialize_permission(database, monkeypatch):
     monkeypatch.setattr("epic.cli.initialize_cli.db", database)
-    result = runner.invoke(app)
-    print("result")
-    print(result.output)
-    # assert User.select().where(User.name == "admin").exists() == True
+    create_tables()
+    initialize_roles()
+    create_permissions()
 
-    # Check if the success message is printed
-    assert "Project initialized successfully." in result.output
+    assert Role.select().count() == 4
+    assert Permission.select().count() == 26
+    assert RolePermission.select().count() == 79

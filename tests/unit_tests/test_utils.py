@@ -27,9 +27,9 @@ def test_get_input(monkeypatch):
     assert result_email == "john.doe@email.com"
 
 
-def test_validate_input(roles_data, monkeypatch):
+def test_validate_input(mock_roles_data, monkeypatch):
     # Mock the roles_data variable
-    monkeypatch.setattr("epic.utils.roles_data", roles_data)
+    monkeypatch.setattr("epic.utils.roles_data", mock_roles_data)
 
     # Call the validate_input function with different types of input
     assert validate_input("John Doe", str) == "John Doe"

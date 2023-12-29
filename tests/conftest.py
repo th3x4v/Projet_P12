@@ -1,23 +1,40 @@
 import pytest
-from peewee import SqliteDatabase
-from epic.models.models import User, Client, Contract, Event, Role
+import peewee
+
+from epic.models.models import (
+    User,
+    Client,
+    Contract,
+    Event,
+    Role,
+    RolePermission,
+    Permission,
+)
 from unittest.mock import patch, MagicMock
-from epic.cli.auth_cli import user_info
+import os
 
-MODELS = [User, Client, Contract, Event, Role]
+MODELS = [User, Client, Contract, Event, Role, Permission, RolePermission]
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture()
 def database():
-    test_db = SqliteDatabase(":memory:")
-    test_db.bind(MODELS, bind_refs=False, bind_backrefs=False)
+    try:
+        os.remove("database_test.db")
+    except FileNotFoundError:
+        pass
+    test_db = peewee.SqliteDatabase("database_test.db", pragmas={"foreign_keys": 1})
+    # Ensure RolePermission is bound before Role and Permission
+    test_db.bind([RolePermission] + MODELS, bind_refs=False, bind_backrefs=False)
+
+    # Create tables in the correct order
+    test_db.create_tables([RolePermission] + MODELS, safe=True)
     yield test_db
     test_db.close()
 
 
 @pytest.fixture(scope="function")
 def setup_database():
-    test_db = SqliteDatabase(":memory:")
+    test_db = peewee.SqliteDatabase(":memory:")
     test_db.bind(MODELS, bind_refs=False, bind_backrefs=False)
     test_db.connect()
     test_db.create_tables(MODELS)
@@ -124,5 +141,5 @@ def mock_is_auth_support(monkeypatch):
 
 
 @pytest.fixture
-def roles_data():
-    return ["admin", "sales", "support"]
+def mock_roles_data():
+    return ["admin", "sales", "support", "super_admin"]

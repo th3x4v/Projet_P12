@@ -8,27 +8,34 @@ from epic.cli.role_cli import app as role_app
 import typer
 import logging
 from epic.models.models import User
+from epic.init_sentry import sentry_sdk
 
 
 def main_function():
     """
     Main function to launch the application
     """
-    app = typer.Typer()
+    try:
+        # result = 1 / 0
 
-    app.add_typer(init_app, name="init")
-    app.add_typer(user_app, name="user")
-    app.add_typer(event_app, name="event")
-    app.add_typer(contract_app, name="contract")
-    app.add_typer(client_app, name="client")
-    app.add_typer(auth_app, name="auth")
-    app.add_typer(role_app, name="role")
+        app = typer.Typer()
 
-    app()
+        app.add_typer(init_app, name="init")
+        app.add_typer(user_app, name="user")
+        app.add_typer(event_app, name="event")
+        app.add_typer(contract_app, name="contract")
+        app.add_typer(client_app, name="client")
+        app.add_typer(auth_app, name="auth")
+        app.add_typer(role_app, name="role")
 
-    logger = logging.getLogger("peewee")
-    logger.addHandler(logging.StreamHandler())
-    logger.setLevel(logging.DEBUG)
+        app()
+
+        logger = logging.getLogger("peewee")
+        logger.addHandler(logging.StreamHandler())
+        logger.setLevel(logging.DEBUG)
+
+    except Exception as e:
+        sentry_sdk.capture_exception(e)
 
 
 if __name__ == "__main__":

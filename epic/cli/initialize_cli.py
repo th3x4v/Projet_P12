@@ -12,6 +12,7 @@ from epic.models.models import (
 import peewee
 from datetime import datetime
 
+
 app = typer.Typer()
 roles_data = ["admin", "sales", "support", "super_admin"]
 
@@ -159,10 +160,11 @@ def initialize():
             db.connect()
         create_tables()
         initialize_roles()
-        User.create_superuser("admin", "admin@epic.com", "password")
+        super_admin = Role.get(Role.name == "super_admin")
         sales = Role.get(Role.name == "sales")
         support = Role.get(Role.name == "support")
         admin = Role.get(Role.name == "admin")
+        User.create_superuser("admin", "admin@epic.com", "password")
 
         RolePermission.create_table()
         create_permissions()
