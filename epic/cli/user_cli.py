@@ -3,7 +3,7 @@ import typer
 from peewee import DoesNotExist
 from epic.cli.auth_cli import check_auth
 from epic.utils import get_input, display_list
-
+import sentry_sdk
 
 app = typer.Typer(callback=check_auth)
 
@@ -68,6 +68,7 @@ def create_user():
 
         user = User.create(name=name, email=email, password=password, role=role)
         typer.echo(f"User {user.name} created successfully.")
+        sentry_sdk.capture_message(f"User {user.name} created successfully.")
     except DoesNotExist:
         typer.echo(f"Role '{role_name}' does not exist.")
 
@@ -174,6 +175,7 @@ def update_user():
         user.role = role
         user.save()
         typer.echo(f"User {user.name} updated successfully.")
+        sentry_sdk.capture_message(f"User {user.name} updated successfully.")
     except DoesNotExist:
         typer.echo(f"Role '{role_name}' does not exist.")
 

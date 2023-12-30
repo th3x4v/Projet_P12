@@ -11,6 +11,7 @@ from epic.models.models import (
 )
 import peewee
 from datetime import datetime
+import sentry_sdk
 
 
 app = typer.Typer()
@@ -285,3 +286,4 @@ def initialize():
             notes="Lorem ipsum dolor sit amet.",
         )
         typer.echo("Project initialized successfully.")
+        sentry_sdk.capture_message("Project initialized successfully.")

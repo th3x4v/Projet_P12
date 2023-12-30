@@ -64,7 +64,6 @@ class User(BaseModel):
                 .where(Role.name == self.role.name)
             )
             self._permissions = [perm.name for perm in query]
-            print(self._permissions)
         return permission in self._permissions
 
     @staticmethod
@@ -137,8 +136,6 @@ class User(BaseModel):
                 # Check if the token is not expired and has necessary information
                 if "user_id" in decoded_token and "role" in decoded_token:
                     # Store user information in the instance
-                    print("user_id")
-                    print(decoded_token["user_id"])
                     user = User.get_by_id(int(decoded_token["user_id"]))
                     return user
                 else:

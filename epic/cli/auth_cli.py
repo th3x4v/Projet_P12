@@ -7,6 +7,16 @@ user_auth = None
 
 
 def check_auth(ctx: typer.Context):
+    """
+    This function is used to check if the user is authenticated and has the permission to execute the given command.
+
+    Args:
+        ctx (typer.Context): The context object that contains information about the current command, including its name and parent.
+
+    Returns:
+        None
+
+    """
     command = ctx.invoked_subcommand
     print(ctx.invoked_subcommand)
     if command in ["login", "logout", "list"]:

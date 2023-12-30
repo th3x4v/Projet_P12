@@ -3,6 +3,7 @@ from epic.models.models import Contract, Client
 from peewee import DoesNotExist
 from epic.cli.auth_cli import check_auth
 from epic.utils import get_input
+import sentry_sdk
 
 app = typer.Typer(callback=check_auth)
 
@@ -53,6 +54,8 @@ def create_contract():
                 signed=signed,
             )
             typer.echo(f"Contract {contract.name} created successfully.")
+            if signed is True:
+                sentry_sdk.capture_message(f"Contract {contract.name} is signed")
         else:
             typer.echo(f"Client {client.name} does not belong to you.")
     except DoesNotExist:
@@ -155,6 +158,7 @@ def update_contract():
     contract_id = get_input("Enter contract ID to update", int)
     try:
         contract = Contract.get(Contract.id == contract_id)
+        status = contract.signed
 
         if contract.client.sales_contact.id == user_auth.id or user_auth.role.name in [
             "admin",
@@ -185,6 +189,8 @@ def update_contract():
 
     contract.save()
     typer.echo(f"Contract {contract.name} updated successfully.")
+    if signed is True and status is False:
+        sentry_sdk.capture_message(f"Contract {contract.name} is signed")
 
 
 @app.command("read")
