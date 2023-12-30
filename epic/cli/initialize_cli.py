@@ -222,8 +222,8 @@ def initialize():
             support_contact=User.get(
                 User.name == "max"
             ),  # Assuming "max" is the support user
-            date_start=datetime(2023, 1, 1, 12, 0),
-            date_end=datetime(2023, 1, 1, 18, 0),
+            date_start=datetime(2023, 1, 1),
+            date_end=datetime(2023, 1, 1),
             location="Venue1",
             attendees=100,
             notes="Lorem ipsum dolor sit amet.",
@@ -232,11 +232,8 @@ def initialize():
         event2_contract1_client1 = Event.create(
             name="Event2 for Contract1",
             contract=contract1_client1,
-            support_contact=User.get(
-                User.name == "val"
-            ),  # Assuming "val" is the support user
-            date_start=datetime(2023, 2, 1, 12, 0),
-            date_end=datetime(2023, 2, 1, 18, 0),
+            date_start=datetime(2023, 2, 1),
+            date_end=datetime(2023, 2, 1),
             location="Venue2",
             attendees=150,
             notes="Lorem ipsum dolor sit amet.",
@@ -266,8 +263,8 @@ def initialize():
             support_contact=User.get(
                 User.name == "max"
             ),  # Assuming "max" is the support user
-            date_start=datetime(2023, 3, 1, 12, 0),
-            date_end=datetime(2023, 3, 1, 18, 0),
+            date_start=datetime(2023, 3, 1),
+            date_end=datetime(2023, 3, 1),
             location="Venue3",
             attendees=120,
             notes="Lorem ipsum dolor sit amet.",
@@ -276,11 +273,8 @@ def initialize():
         event2_contract1_client2 = Event.create(
             name="Event2 for Contract1",
             contract=contract1_client2,
-            support_contact=User.get(
-                User.name == "val"
-            ),  # Assuming "val" is the support user
-            date_start=datetime(2023, 4, 1, 12, 0),
-            date_end=datetime(2023, 4, 1, 18, 0),
+            date_start=datetime(2023, 4, 1),
+            date_end=datetime(2023, 4, 1),
             location="Venue4",
             attendees=200,
             notes="Lorem ipsum dolor sit amet.",

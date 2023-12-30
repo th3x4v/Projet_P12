@@ -43,7 +43,7 @@ def create_contract():
         client = Client.get(Client.id == client_id)
         if client.sales_contact.id == user_auth.id:
             name = get_input("Enter contract name", str)
-            signed = get_input("Is the contract signed? (True/False)", bool)
+            signed = get_input("Is the contract signed? (True/False)", "status")
             total_amount = get_input("Enter total amount", float)
             due_amount = get_input("Enter due amount", float)
             contract = Contract.create(
@@ -174,9 +174,7 @@ def update_contract():
         typer.echo(f"Contract with ID {contract_id} does not exist.")
 
     name = get_input("Enter new name or press 'Enter'", str, default=contract.name)
-    signed = get_input(
-        "Is the contract signed? (True/False)", bool, default=contract.signed
-    )
+    signed = get_input("Is the contract signed? (True/False)", "status")
     total_amount = get_input(
         "Enter new total amount", float, default=contract.total_amount
     )

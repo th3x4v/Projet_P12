@@ -29,7 +29,7 @@ def validate_input(value, input_type):
         return int(value)
     elif input_type == float:
         return float(value)
-    elif input_type == bool:
+    elif input_type == "status":
         if value.lower() == "true":
             return True
         elif value.lower() == "false":

@@ -4,7 +4,7 @@ from peewee import (
     IntegerField,
     FloatField,
     ForeignKeyField,
-    DateTimeField,
+    DateField,
     BooleanField,
     TextField,
 )
@@ -155,8 +155,8 @@ class Client(BaseModel):
     email = CharField(max_length=50, unique=True)
     phone = CharField(max_length=15, null=False)
     company = CharField(max_length=50, null=False)
-    date_created = DateTimeField(default=datetime.now)
-    date_updated = DateTimeField(default=datetime.now)
+    date_created = DateField(default=datetime.now)
+    date_updated = DateField(default=datetime.now)
     sales_contact = ForeignKeyField(User, backref="clients")
 
     def __str__(self):
@@ -186,7 +186,7 @@ class Contract(BaseModel):
     total_amount = FloatField(default=0.0)
     due_amount = FloatField(default=0.0)
     signed = BooleanField(default=False)
-    date_created = DateTimeField(default=datetime.now)
+    date_created = DateField(default=datetime.now)
 
     def __str__(self):
         return f"Contract {self.id}"
@@ -196,8 +196,8 @@ class Event(BaseModel):
     name = CharField(max_length=50, null=False)
     contract = ForeignKeyField(Contract, backref="events")
     support_contact = ForeignKeyField(User, null=True, default=None, backref="events")
-    date_start = DateTimeField()
-    date_end = DateTimeField()
+    date_start = DateField()
+    date_end = DateField()
     location = CharField(max_length=50)
     attendees = IntegerField()
     notes = TextField()
