@@ -2,9 +2,9 @@
 
 Project created as part of my OpenClassrooms Python Application Developer training.
 
-This is a web application built with Django for a fictional company, Epic Events.
+This is a web application built with  CLI commands for a fictional company, Epic Events.
 
-The Epic Events CRM application aims to help B2B companies efficiently track and manage customer events using a RESTful API.
+The Epic Events CRM application aims to help B2B companies efficiently track and manage customer events.
 
 # Features
 
