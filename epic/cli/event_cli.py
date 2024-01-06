@@ -131,11 +131,7 @@ def delete_event():
         if (
             user_auth.id == event.support_contact.id
             or user_auth.id == event.contract.client.sales_contact.id
-            or user_auth.role.name
-            in [
-                "admin",
-                "super_admin",
-            ]
+            or user_auth.role.name in ["admin", "super_admin"]
         ):
             event.delete_instance()
             typer.echo(f"Event {event.name} deleted successfully.")
@@ -223,7 +219,6 @@ def update_event():
 
     try:
         event.name = name
-        event.support_contact = support_contact
         event.date_start = date_start
         event.date_end = date_end
         event.location = location
@@ -239,7 +234,7 @@ def update_event():
 @app.command("read")
 def my_events():
     """
-    Returns a list of events that the user is associated with.
+    Returns a list of events that the user is associated with or event whitout support for admin user
 
     Args:
         None
@@ -262,8 +257,6 @@ def my_events():
         events = (
             user_auth.events
         )  # Access events through the relationship defined in models
-        print("events")
-        print(events)
         for event in events:
             typer.echo(f"Event ID: {event.id}, Name: {event.name}")
     elif user_auth.role.name == "sales":
@@ -273,6 +266,10 @@ def my_events():
                 typer.echo(
                     f"Event ID: {event.id}, Name: {event.name}, Contract ID: {event.contract.id}, Location: {event.location}"
                 )
+    elif user_auth.role.name in ["admin", "super_admin"]:
+        events = Event.select().where(Event.support_contact.is_null())
+        for event in events:
+            typer.echo(f"Event ID: {event.id}, Name: {event.name}")
     else:
         typer.echo("User not allowed to view events.")
 

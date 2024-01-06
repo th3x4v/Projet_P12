@@ -49,6 +49,13 @@ The Epic Events CRM application aims to help B2B companies efficiently track and
 
 The following CLI commands are available in the Epic application:
 
+## Initialization of the project CLI
+- [python -m epic init initialize]: Creates the database and a super-admin user (name:"admin", email:"admin@epic.com",password:"password")
+
+## User login CLI
+- [python -m epic auth login]: Login user with password
+- [python -m epic auth logout]: Logout user
+
 ## User CLI
 - [python -m epic user create]: Creates a new user.
 - [python -m epic user list]: Lists all users.

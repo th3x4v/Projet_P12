@@ -35,8 +35,8 @@ def test_validate_input(mock_roles_data, monkeypatch):
     assert validate_input("John Doe", str) == "John Doe"
     assert validate_input("42", int) == 42
     assert validate_input("3.14", float) == 3.14
-    assert validate_input("True", bool) == True
-    assert validate_input("False", bool) == False
+    assert validate_input("True", "status") == True
+    assert validate_input("False", "status") == False
     assert validate_input("john.doe@example.com", "email") == "john.doe@example.com"
     assert validate_input("1234567890", "phone") == 1234567890
     assert validate_input("admin", "role_name") == "admin"
