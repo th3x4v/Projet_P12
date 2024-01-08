@@ -100,7 +100,7 @@ def list_events():
     events = Event.select()
     for event in events:
         typer.echo(
-            f"Event ID: {event.id}, Name: {event.name}, Contract ID: {event.contract.id}, Location: {event.location}"
+            f"Event ID: {event.id}, Name: {event.name}, Contract ID: {event.contract.id}, Support Contact ID: {event.support_contact.id if event.support_contact else 'None'}, Start Date: {event.date_start}, End Date: {event.date_end}, Location: {event.location}, Attendees: {event.attendees}, Notes: {event.notes}"
         )
 
 
@@ -199,36 +199,47 @@ def update_event():
             f"Event with ID {event_id} or Contract or support contact does not exist."
         )
         return None
+    if (
+        event.contract.client.sales_contact.id == user_auth.id
+        or event.support_contact == user_auth
+        or user_auth.role.name
+        in [
+            "admin",
+            "super_admin",
+        ]
+    ):
+        name = get_input("Enter new name or press 'Enter':", str, default=event.name)
+        date_start = get_input(
+            "Enter new start date or press 'Enter'", "date", default=event.date_start
+        )
+        date_end = get_input(
+            "Enter new end date or press 'Enter'", "date", default=event.date_end
+        )
+        location = get_input(
+            "Enter new location or press 'Enter'", str, default=event.location
+        )
+        attendees = get_input(
+            "Enter new number of attendees or press 'Enter'",
+            int,
+            default=event.attendees,
+        )
+        notes = get_input("Enter new notes or press 'Enter'", str, default=event.notes)
 
-    name = get_input("Enter new name or press 'Enter':", str, default=event.name)
-    date_start = get_input(
-        "Enter new start date or press 'Enter'", "date", default=event.date_start
-    )
-    date_end = get_input(
-        "Enter new end date or press 'Enter'", "date", default=event.date_end
-    )
-    location = get_input(
-        "Enter new location or press 'Enter'", str, default=event.location
-    )
-    attendees = get_input(
-        "Enter new number of attendees or press 'Enter'",
-        int,
-        default=event.attendees,
-    )
-    notes = get_input("Enter new notes or press 'Enter'", str, default=event.notes)
+        try:
+            event.name = name
+            event.date_start = date_start
+            event.date_end = date_end
+            event.location = location
+            event.attendees = attendees
+            event.notes = notes
 
-    try:
-        event.name = name
-        event.date_start = date_start
-        event.date_end = date_end
-        event.location = location
-        event.attendees = attendees
-        event.notes = notes
-
-        event.save()
-        typer.echo(f"Event {event.name} updated successfully.")
-    except DoesNotExist:
-        typer.echo(f"Support contact with ID {support_contact_id} does not exist.")
+            event.save()
+            typer.echo(f"Event {event.name} updated successfully.")
+        except DoesNotExist:
+            typer.echo(f"Support contact with ID {support_contact_id} does not exist.")
+    else:
+        typer.echo(f"Contract {event.name} does not belong to you.")
+        return None
 
 
 @app.command("read")
@@ -258,7 +269,9 @@ def my_events():
             user_auth.events
         )  # Access events through the relationship defined in models
         for event in events:
-            typer.echo(f"Event ID: {event.id}, Name: {event.name}")
+            typer.echo(
+                f"Event ID: {event.id}, Name: {event.name}, Contract ID: {event.contract.id}, Location: {event.location}"
+            )
     elif user_auth.role.name == "sales":
         events = Event.select()
         for event in events:
@@ -269,6 +282,7 @@ def my_events():
     elif user_auth.role.name in ["admin", "super_admin"]:
         events = Event.select().where(Event.support_contact.is_null())
         for event in events:
+            typer.echo("Events without support contact.")
             typer.echo(f"Event ID: {event.id}, Name: {event.name}")
     else:
         typer.echo("User not allowed to view events.")
