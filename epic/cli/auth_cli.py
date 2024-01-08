@@ -19,7 +19,7 @@ def check_auth(ctx: typer.Context):
     """
     command = ctx.invoked_subcommand
     print(ctx.invoked_subcommand)
-    if command in ["login", "logout", "list"]:
+    if command in ["login", "logout"]:
         return
     global user_auth
     user_auth = User.is_auth()
